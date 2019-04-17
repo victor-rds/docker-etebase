@@ -1,5 +1,4 @@
-ARG TAG=alpine
-FROM python:$TAG
+FROM python:alpine
 
 ENV BASE_DIR /etesync
 ENV DATA_DIR /data

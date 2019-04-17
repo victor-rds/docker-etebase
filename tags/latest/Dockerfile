@@ -1,5 +1,4 @@
-ARG TAG=latest
-FROM python:$TAG
+FROM python:latest
 
 ENV BASE_DIR /etesync
 ENV DATA_DIR /data

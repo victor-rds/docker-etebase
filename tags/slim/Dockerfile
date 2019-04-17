@@ -1,5 +1,4 @@
-ARG TAG=slim
-FROM python:$TAG
+FROM python:slim
 
 ENV BASE_DIR /etesync
 ENV DATA_DIR /data
