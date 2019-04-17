@@ -28,17 +28,22 @@ RUN set -e && \
     mkdir -p $CERT_DIR && \
     mkdir -p $STATIC_DIR && \
     tar xvf $BASE_DIR/master.tar.gz -C $BASE_DIR --strip-components=1 --exclude="example-configs" --exclude-vcs && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libssl-dev && \
     pip install -r $BASE_DIR/requirements.txt uwsgi && \
+    apt-get remove --purge -y build-essential && \
+	apt-get autoremove --purge -y && \
     $BASE_DIR/manage.py collectstatic && \
     mv $BASE_DIR/static $STATIC_DIR/ && \
     ln -s $STATIC_DIR/static $BASE_DIR/static && \
     rm $BASE_DIR/master.tar.gz $BASE_DIR/requirements.txt $SECRET_FILE && \
-    chown -h etesync:etesync $BASE_DIR/static
+    rm -rf /var/lib/apt/lists/*
 
 COPY context /
 
 # Fix permissions
-RUN chown -R etesync:etesync $STATIC_DIR && \
+RUN chown -h etesync:etesync $BASE_DIR/static && \
+    chown -R etesync:etesync $STATIC_DIR && \
     chmod -R a=rX $STATIC_DIR && \
     chown -R etesync:etesync $DATA_DIR && \
     chmod -R ug=rwX $DATA_DIR && \

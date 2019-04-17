@@ -32,13 +32,13 @@ RUN set -e && \
     $BASE_DIR/manage.py collectstatic && \
     mv $BASE_DIR/static $STATIC_DIR/ && \
     ln -s $STATIC_DIR/static $BASE_DIR/static && \
-    rm $BASE_DIR/master.tar.gz $BASE_DIR/requirements.txt $SECRET_FILE && \
-    chown -h etesync:etesync $BASE_DIR/static
+    rm $BASE_DIR/master.tar.gz $BASE_DIR/requirements.txt $SECRET_FILE
 
 COPY context /
 
 # Fix permissions
-RUN chown -R etesync:etesync $STATIC_DIR && \
+RUN chown -h etesync:etesync $BASE_DIR/static  && \
+    chown -R etesync:etesync $STATIC_DIR && \
     chmod -R a=rX $STATIC_DIR && \
     chown -R etesync:etesync $DATA_DIR && \
     chmod -R ug=rwX $DATA_DIR && \
