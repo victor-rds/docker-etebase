@@ -40,7 +40,7 @@ This image exposes the **3735** TCP Port
 
 ## Settings and Customization
 
-Custom settings can be added to the `/etesync/etesync_site_settings.py` this file override the default `settings.py`, this is mostly for changing _Django: The Web framework_ options, to avoid this some environment variables were added.
+Custom settings can be added to `/etesync/etesync_site_settings.py`, this file overrides the default `settings.py`, mostly for _Django: The Web framework_ options, this image uses the variables below to set some of these options.
 
 ### _Environment Variables on `/etesync/etesync_site_settings.py`_
 
