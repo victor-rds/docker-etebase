@@ -8,6 +8,8 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_HOSTS','*').split(',')
 
 LANGUAGE_CODE = os.environ.get('DJANGO_LC','en-us')
 
-TIME_ZONE = os.environ.get('TZ', 'UTC')
+USE_TZ = os.environ.get('USE_TZ', False)
+
+TIME_ZONE = os.environ.get('TIME_ZONE', 'UTC')
 
 SECRET_FILE = os.environ.get('SECRET_FILE')

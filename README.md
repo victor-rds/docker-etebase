@@ -48,7 +48,8 @@ Custom settings can be added to the `/etesync/etesync_site_settings.py` this fil
 - **DEBUG**: enables Django Debug mode, not recommended for production defaults to False;
 - **LANGUAGE_CODE**: Django language code, default: `en-us`;
 - **SECRET_FILE**: Defines file that contains the value for django's `SECRET_KEY` if not found a new one is generated. default: `/etesync/secret.txt`.
-- **TIME_ZONE**: time zone, default `UTC`;
+- **USE_TZ**: Force Django to use time-zone-aware datetime objects internally, defaults to `false`;
+- **TIME_ZONE**: time zone, defaults to `UTC`;
 
 ### _Using uWSGI with HTTPS_
 
