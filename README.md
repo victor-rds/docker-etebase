@@ -55,7 +55,7 @@ Custom settings can be added to `/etesync/etesync_site_settings.py`, this file o
 
 If you want to run ETESync Server HTTPS using uWSGI you need to pass certificates or the image will generate a self-sign certificate for `localhost`.
 
-By default ETESync will look for the files `/cert/crt.pem` and `/cert/key.pem`, if for some reason you change this location change the **X509_CRT** and **X509_KEY** environment variables
+By default ETESync will look for the files `/certs/crt.pem` and `/certs/key.pem`, if for some reason you change this location change the **X509_CRT** and **X509_KEY** environment variables
 
 ### _Serving Static Files_
 
