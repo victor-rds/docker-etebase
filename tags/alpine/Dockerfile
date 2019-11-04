@@ -29,6 +29,7 @@ RUN set -e && \
     tar x -v -z -f $BASE_DIR/master.tar.gz -C /tmp --exclude */example-configs --exclude */.git* && \
     mv /tmp/server-skeleton-master/* $BASE_DIR/ && \
     apk add --no-cache openssl libressl && \
+    apk add --no-cache mailcap && \
     apk add --no-cache --virtual .build-deps coreutils gcc make linux-headers libc-dev libressl-dev && \
     pip install -r $BASE_DIR/requirements.txt uwsgi && \
     apk del .build-deps && \
