@@ -27,7 +27,7 @@ RUN set -e && \
     mkdir -p $CERT_DIR && \
     mkdir -p $STATIC_DIR && \
     tar x -v -z -f $BASE_DIR/master.tar.gz -C /tmp --exclude */example-configs --exclude */.git* && \
-    mv /tmp/server-skeleton-master/* $BASE_DIR/ && \
+    mv /tmp/server-master/* $BASE_DIR/ && \
     apk add --no-cache openssl libressl && \
     apk add --no-cache mailcap && \
     apk add --no-cache --virtual .build-deps coreutils gcc make linux-headers libc-dev libressl-dev && \
@@ -37,7 +37,7 @@ RUN set -e && \
     mv $BASE_DIR/static $STATIC_DIR/ && \
     ln -s $STATIC_DIR/static $BASE_DIR/static && \
     rm $BASE_DIR/master.tar.gz $BASE_DIR/requirements.txt $SECRET_FILE && \
-    rm -r /tmp/server-skeleton-master
+    rm -r /tmp/server-master
 
 COPY context /
 
