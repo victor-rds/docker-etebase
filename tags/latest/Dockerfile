@@ -22,7 +22,7 @@ ADD https://github.com/etesync/server-skeleton/archive/master.tar.gz $BASE_DIR
 
 RUN set -e && \
     groupadd -r -g $PGID etesync && \
-	useradd -d $BASE_DIR -r -M -s /bin/sh -g $PGID -u $PUID etesync && \
+    useradd -d $BASE_DIR -r -M -s /bin/sh -g $PGID -u $PUID etesync && \
     mkdir -p $DATA_DIR && \
     mkdir -p $CERT_DIR && \
     mkdir -p $STATIC_DIR && \
