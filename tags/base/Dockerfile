@@ -33,19 +33,19 @@ RUN set -e && \
     $BASE_DIR/manage.py collectstatic && \
     mv $BASE_DIR/static $STATIC_DIR/ && \
     ln -s $STATIC_DIR/static $BASE_DIR/static && \
-    rm $BASE_DIR/${TAG}.tar.gz $BASE_DIR/requirements.txt $SECRET_FILE
-
-COPY --chown=$PUID:$PGID context /
-
-# Fix permissions
-RUN chown -h etesync:etesync $BASE_DIR/static  && \
+    rm $BASE_DIR/${TAG}.tar.gz $BASE_DIR/requirements.txt $SECRET_FILE && \
+    chown -h etesync:etesync $BASE_DIR/static && \
     chown -R etesync:etesync $STATIC_DIR && \
     chmod -R a=rX $STATIC_DIR && \
     chown -R etesync:etesync $DATA_DIR && \
     chmod -R ug=rwX $DATA_DIR && \
     chown -R etesync:etesync $BASE_DIR && \
-    chmod -R ug=rwX $BASE_DIR && \
-    chown root:root /entrypoint.sh && \
+    chmod -R ug=rwX $BASE_DIR
+
+COPY --chown=$PUID:$PGID context /
+
+# Fix permissions
+RUN chown root:root /entrypoint.sh && \
     chmod a=rx /entrypoint.sh
 
 VOLUME $DATA_DIR
