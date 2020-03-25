@@ -1,6 +1,6 @@
 # ETESync Sever Docker Images
 
-Docker image for [ETESync](https://www.etesync.com/) based on the [server-skeleton](https://github.com/etesync/server-skeleton) repository by [Tom Hacohen](https://github.com/tasn).
+Docker image for [ETESync](https://www.etesync.com/) based on the [server](https://github.com/etesync/server) repository by [Tom Hacohen](https://github.com/tasn).
 
 ## Tags
 
