@@ -47,7 +47,7 @@ RUN set -e && \
     chown -R etesync:etesync $BASE_DIR && \
     chmod -R ug=rwX $BASE_DIR
 
-COPY --chown=$PUID:$PGID context /
+COPY --chown=etesync:etesync context /
 
 # Fix permissions
 RUN chown root:root /entrypoint.sh && \
