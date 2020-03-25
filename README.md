@@ -4,12 +4,17 @@ Docker image for [ETESync](https://www.etesync.com/) based on the [server-skelet
 
 ## Tags
 
-This build follows some tags of the Python official docker images:
+The following tags are built on latest python image and master branch of ETESync Server 
 
-- `latest` [(stable:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/stable/tags/latest/Dockerfile)
-- `edge` [(master:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/latest/Dockerfile)
-- `slim`  [(stable:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/stable/tags/slim/Dockerfile)
-- `alpine` [(stable:tags/debian/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/stable/tags/alpine/Dockerfile)
+- `latest` [(master:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/base/Dockerfile)
+- `slim`  [(master:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/slim/Dockerfile)
+- `alpine` [(master:tags/debian/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/alpine/Dockerfile)
+
+Starting on v0.3.0 ther will be builds base stable published version of ETESync
+
+- `0.3.0` [(v0.3.0:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/base/Dockerfile)
+- `0.3.0-slim`  [(v0.3.0:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/slim/Dockerfile)
+- `0.3.0-alpine` [(v0.3.0:tags/debian/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/alpine/Dockerfile)
 
 ## Usage
 
