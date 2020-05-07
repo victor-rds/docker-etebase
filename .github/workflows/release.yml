@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: 'release'
     - uses: docker/build-push-action@v1.1.0
       with:
         username: ${{ secrets.DOCKER_USER }}
@@ -25,6 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: 'release'
     - uses: docker/build-push-action@v1.1.0
       with:
         username: ${{ secrets.DOCKER_USER }}
@@ -41,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: 'release'
     - uses: docker/build-push-action@v1.1.0
       with:
         username: ${{ secrets.DOCKER_USER }}
