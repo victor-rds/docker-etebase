@@ -1,4 +1,4 @@
-# ETESync Sever Docker Images
+# ![](https://raw.githubusercontent.com/etesync/server/master/icon.svg) ETESync Sever Docker Images
 
 Docker image for [ETESync](https://www.etesync.com/) based on the [server](https://github.com/etesync/server) repository by [Tom Hacohen](https://github.com/tasn).
 
@@ -12,9 +12,9 @@ The following tags are built on latest python image and master branch of ETESync
 
 Starting on v0.3.0 ther will be builds base stable published version of ETESync
 
-- `0.3.0` [(v0.3.0:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/base/Dockerfile)
-- `0.3.0-slim`  [(v0.3.0:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/slim/Dockerfile)
-- `0.3.0-alpine` [(v0.3.0:tags/debian/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/alpine/Dockerfile)
+- `0.3.0`
+- `0.3.0-slim`
+- `0.3.0-alpine`
 
 ## Usage
 
