@@ -1,0 +1,53 @@
+name: Build on Pull Requests
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: docker/build-push-action@v1.1.0
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+        repository: victorrds/etesync
+        always_pull: true
+        push: false
+        path: ./tags/base/Dockerfile
+        tags: ${{ github.sha }}
+        build_args: TAG=master
+
+  build-slim:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: docker/build-push-action@v1.1.0
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+        repository: victorrds/etesync
+        always_pull: true
+        add_git_labels: true
+        push: false
+        path: ./tags/slim/Dockerfile
+        tags: ${{ github.sha }}-slim
+        build_args: TAG=master
+  
+  build-alpine:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: docker/build-push-action@v1.1.0
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+        repository: victorrds/etesync
+        always_pull: true
+        add_git_labels: true
+        push: false
+        path: ./tags/alpine/Dockerfile
+        tags: ${{ github.sha }}-alpine
+        build_args: TAG=master
