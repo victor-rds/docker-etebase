@@ -18,9 +18,9 @@ Starting on v0.3.0 ther will be builds base stable published version of ETESync
 
 ## Usage
 
-```docker run  -d -e SUPER_USER=admin -e SUPER_PASS=changeme -p 80:3735 -v /path/on/host:/data victorrds/etesync```
+```docker run  -d -e SUPER_USER=admin -p 80:3735 -v /path/on/host:/data victorrds/etesync```
 
-Create a container running ETESync usiong http protocol.
+Create a container running ETESync using http protocol.
 
 ## Volumes
 
@@ -30,7 +30,11 @@ Create a container running ETESync usiong http protocol.
 
 This image exposes the **3735** TCP Port
 
-## Environment Variables
+## Settings and Customization
+
+Custom settings can be added to `/etesync/etesync_site_settings.py`, this file overrides the default `settings.py`, mostly for _Django: The Web framework_ options, this image also uses the some environment variables to set some of these options.
+
+### Environment Variables
 
 - **SERVER**: Defines how the container will serve the application, the options are:
   - `http` Runs using HTTP protocol, this is the default mode.
@@ -38,23 +42,29 @@ This image exposes the **3735** TCP Port
   - `uwsgi` start using uWSGI native protocol, for reverse-proxies/load balances, such as _nginx_, that support this protocol
   - `http-socket` Similar to the first option, but without uWSGI HTTP router/proxy/load-balancer, this recommended for any reverse-proxies/load balances, that support HTTP protocol, like _traefik_
   - `django-server` this mode uses the embedded django http server, `./manage.py runserver :3735`, this is not recommeded but can be useful for debugging
-- **SUPER_USER** and **SUPER_PASS**: Username and password of the django superuser (only used if no previous database is found, both must be used together);
-- **SUPER_EMAIL**: Email of the django superuser (optional, only used if no database is found);
 - **PUID** and **PGID**: set user and group when running using uwsgi, default: `1000`;
 - **ETESYNC_DB_PATH**: Location of the ETESync SQLite database. default: `/data` volume;
+- **AUTO_MIGRATE**: Trigger database update/migration every time the container starts, default: `false `, more details below.
 
-## Settings and Customization
+### How to create a Superuser
 
-Custom settings can be added to `/etesync/etesync_site_settings.py`, this file overrides the default `settings.py`, mostly for _Django: The Web framework_ options, this image uses the variables below to set some of these options.
+#### Method 1 Environment Variables on first run.
 
-### _Environment Variables on `/etesync/etesync_site_settings.py`_
+If these variables are set on the first run it will trigger the creation of a superuser after the database is ready.
 
-- **ALLOWED_HOSTS**:  the ALLOWED_HOSTS settings, must be valid domains separated by `,`. default: `*` (not recommended for production);
-- **DEBUG**: enables Django Debug mode, not recommended for production defaults to False;
-- **LANGUAGE_CODE**: Django language code, default: `en-us`;
-- **SECRET_FILE**: Defines file that contains the value for django's `SECRET_KEY` if not found a new one is generated. default: `/etesync/secret.txt`.
-- **USE_TZ**: Force Django to use time-zone-aware datetime objects internally, defaults to `false`;
-- **TIME_ZONE**: time zone, defaults to `UTC`;
+- **SUPER_USER**: Username of the django superuser (only used if no previous database is found);
+  - **SUPER_PASS**: Password of the django superuser (optional, one will be generated if not found);
+  - **SUPER_EMAIL**: Email of the django superuser (optional);
+
+#### Method 2 Python Shell
+
+At any moment after the database is ready, you can create a new superuser by running and following the prompts:
+```docker exec -it etesync_container python manage.py createsuperuser```
+
+### Updgrade application and database
+
+If `AUTO_MIGRATE` is not set you can update by running:
+```docker exec -it etesync_container python manage.py migrate```
 
 ### _Using uWSGI with HTTPS_
 
