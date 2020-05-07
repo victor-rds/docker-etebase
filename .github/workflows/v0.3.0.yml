@@ -17,7 +17,7 @@ jobs:
         always_pull: true
         add_git_labels: true
         push: true
-        path: ./tags/base/Dockerfile
+        dockerfile: ./tags/base/Dockerfile
         tags: v0.3.0
         build_args: TAG='v0.3.0'
 
@@ -33,7 +33,7 @@ jobs:
         always_pull: true
         add_git_labels: true
         push: true
-        path: ./tags/slim/Dockerfile
+        dockerfile: ./tags/slim/Dockerfile
         tags: 0.3.0-slim
         build_args: TAG='v0.3.0'
   
@@ -49,6 +49,6 @@ jobs:
         always_pull: true
         add_git_labels: true
         push: true
-        path: ./tags/alpine/Dockerfile
+        dockerfile: ./tags/alpine/Dockerfile
         tags: 0.3.0-alpine
         build_args: TAG='v0.3.0'

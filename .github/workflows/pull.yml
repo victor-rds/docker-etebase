@@ -16,7 +16,7 @@ jobs:
         repository: victorrds/etesync
         always_pull: true
         push: false
-        path: ./tags/base/Dockerfile
+        dockerfile: ./tags/base/Dockerfile
         tags: ${{ github.sha }}
         build_args: TAG=master
 
@@ -32,7 +32,7 @@ jobs:
         always_pull: true
         add_git_labels: true
         push: false
-        path: ./tags/slim/Dockerfile
+        dockerfile: ./tags/slim/Dockerfile
         tags: ${{ github.sha }}-slim
         build_args: TAG=master
   
@@ -48,6 +48,6 @@ jobs:
         always_pull: true
         add_git_labels: true
         push: false
-        path: ./tags/alpine/Dockerfile
+        dockerfile: ./tags/alpine/Dockerfile
         tags: ${{ github.sha }}-alpine
         build_args: TAG=master
