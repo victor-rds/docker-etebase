@@ -6,18 +6,35 @@ if [ ! -z "$@" ]; then
     exec "$@"
 fi
 
-if [ ! -e "$ETESYNC_DB_PATH" ]; then
+if [ ! -e "$ETESYNC_DB_PATH" ] || [ -z "$ETESYNC_DB_PATH/db.sqlite3" ]; then
     # first run
+	echo "-------------------------------------------------------------"
 	echo 'Create Database'
 
     $BASE_DIR/manage.py migrate
 	chown -R $PUID:$PGID "$DATA_DIR"
 	
-	if [ "$SUPER_USER" -a "$SUPER_PASS" ]; then
-		echo 'Create Super User'
+	if [ "$SUPER_USER" ]; then
+		echo "-------------------------------------------------------------"
+		if [ -z "$SUPER_PASS" ]; then
+			SUPER_PASS=$(openssl rand -base64 31)
+			echo "Admin Password: $SUPER_PASS"
+		fi
+
+		echo 'Creating Super User'
 		echo "from django.contrib.auth.models import User; User.objects.create_superuser('$SUPER_USER' , '$SUPER_EMAIL', '$SUPER_PASS')" | python manage.py shell
 	fi
 fi
+
+echo "-------------------------------------------------------------"
+$BASE_DIR/manage.py showmigrations --list | grep -v '\[X\]'
+
+if [ "$AUTO_MIGRATE" ]; then
+	$BASE_DIR/manage.py migrate
+else
+	echo "If necessary please run: docker exec -it $HOSTNAME python manage.py migrate"
+fi
+echo "-------------------------------------------------------------"
 
 if [ ! -e "$STATIC_DIR/static/admin" ] || [ ! -e "$STATIC_DIR/static/rest_framework" ]; then
 	echo 'Static files are missing, running manage.py collectstatic...'
@@ -29,8 +46,8 @@ fi
 
 if [ $SERVER = 'https' ] && { [ ! -f "$X509_CRT" ] || [ ! -f "$X509_KEY" ]; }; then
 	echo "TLS is enabled, however neither the certificate nor the key were found!"
-	echo "The coorrect paths are '$X509_CRT' and '$X509_KEY'"
-	echo "Let's generate a selfsign certificate for localhost, but this isn't recommended"
+	echo "The correct paths are '$X509_CRT' and '$X509_KEY'"
+	echo "Let's generate a self-sign certificate for localhost, but this isn't recommended"
    	openssl req -x509 -nodes -newkey rsa:2048 -keyout $X509_KEY -out $X509_CRT -days 365 -subj '/CN=localhost'
 fi
 
