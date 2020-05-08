@@ -6,9 +6,9 @@ Docker image for [ETESync](https://www.etesync.com/) based on the [server](https
 
 The following tags are built on latest python image and master branch of ETESync Server 
 
-- `latest` [(master:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/base/Dockerfile)
-- `slim`  [(master:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/slim/Dockerfile)
-- `alpine` [(master:tags/debian/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/alpine/Dockerfile)
+- `latest` [(release:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/base/Dockerfile)
+- `slim`  [(release:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/slim/Dockerfile)
+- `alpine` [(release:tags/debian/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/alpine/Dockerfile)
 
 Starting on v0.3.0 ther will be builds base stable published version of ETESync
 
@@ -59,12 +59,14 @@ If these variables are set on the first run it will trigger the creation of a su
 #### Method 2 Python Shell
 
 At any moment after the database is ready, you can create a new superuser by running and following the prompts:
-```docker exec -it etesync_container python manage.py createsuperuser```
+
+```docker exec -it {container_name} python manage.py createsuperuser```
 
 ### Updgrade application and database
 
 If `AUTO_MIGRATE` is not set you can update by running:
-```docker exec -it etesync_container python manage.py migrate```
+
+```docker exec -it {container_name} python manage.py migrate```
 
 ### _Using uWSGI with HTTPS_
 
