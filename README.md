@@ -45,6 +45,12 @@ Custom settings can be added to `/etesync/etesync_site_settings.py`, this file o
 - **PUID** and **PGID**: set user and group when running using uwsgi, default: `1000`;
 - **ETESYNC_DB_PATH**: Location of the ETESync SQLite database. default: `/data` volume;
 - **AUTO_MIGRATE**: Trigger database update/migration every time the container starts, default: `false `, more details below.
+- **SECRET_FILE**: Defines file that contains the value for django's SECRET_KEY if not found a new one is generated. default: /etesync/secret.txt.
+- **ALLOWED_HOSTS**: the ALLOWED_HOSTS settings, must be valid domains separated by ,. default: * (not recommended for production);
+- **LANGUAGE_CODE**: Django language code, default: en-us;
+- **USE_TZ**: Force Django to use time-zone-aware datetime objects internally, defaults to false;
+- **TIME_ZONE**: time zone, defaults to UTC;
+- **DEBUG**: enables Django Debug mode, not recommended for production defaults to False;
 
 ### How to create a Superuser
 
