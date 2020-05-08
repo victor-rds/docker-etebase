@@ -1,6 +1,10 @@
 # ![](https://raw.githubusercontent.com/etesync/server/master/icon.svg) ETESync Sever Docker Images
 
+![Latest Image](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push/badge.svg?branch=release)
+![0.3.0 Image](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%200.3.0/badge.svg?branch=release)
+
 Docker image for [ETESync](https://www.etesync.com/) based on the [server](https://github.com/etesync/server) repository by [Tom Hacohen](https://github.com/tasn).
+
 
 ## Tags
 
