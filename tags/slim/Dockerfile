@@ -1,4 +1,4 @@
-FROM python:slim
+FROM python:3.8.3-slim
 
 ARG TAG='master'
 

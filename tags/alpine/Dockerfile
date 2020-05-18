@@ -1,4 +1,4 @@
-FROM python:alpine
+FROM python:3.8.3-alpine
 
 ARG TAG='master'
 
