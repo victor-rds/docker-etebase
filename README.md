@@ -12,7 +12,7 @@ The following tags are built on latest python image and master branch of EteSync
 
 - `latest` [(release:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/base/Dockerfile)
 - `slim`  [(release:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/slim/Dockerfile)
-- `alpine` [(release:tags/debian/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/alpine/Dockerfile)
+- `alpine` [(release:tags/alpine/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/alpine/Dockerfile)
 
 Starting on v0.3.0 ther will be builds base stable published version of EteSync
 
