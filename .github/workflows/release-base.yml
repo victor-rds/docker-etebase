@@ -6,6 +6,7 @@ on:
     paths:
       - 'context/**'
       - 'tags/base/Dockerfile'
+      - '.github/workflows/release-base.yml'
 
 jobs:
   build-master:

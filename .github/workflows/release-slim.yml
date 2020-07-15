@@ -6,6 +6,7 @@ on:
     paths:
       - 'context/**'
       - 'tags/slim/Dockerfile'
+      - '.github/workflows/release-slim.yml'
       
 jobs:
   build-master:

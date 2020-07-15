@@ -6,7 +6,7 @@ on:
     paths:
       - 'context/**'
       - 'tags/alpine/Dockerfile'
-      
+      - '.github/workflows/release-alpine.yml'
 jobs:  
   build-master:
     runs-on: ubuntu-latest

@@ -6,6 +6,7 @@ on:
     paths:
       - 'context/**'
       - 'tags/alpine/Dockerfile'
+      - '.github/workflows/*-alpine.yml'
 
 jobs:
   build-alpine:
