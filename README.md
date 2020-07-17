@@ -1,7 +1,8 @@
 # ![](https://raw.githubusercontent.com/etesync/server/master/icon.svg) EteSync Sever Docker Images
 
-![Build and Push](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push/badge.svg?branch=release)
-![Build and Push 0.3.0](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%200.3.0/badge.svg?branch=release)
+![Build and Push Base Tags](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%20Base%20Tags/badge.svg?branch=release)
+![Build and Push Slim Tags](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%20Slim%20Tags/badge.svg?branch=release)
+![Build and Push Alpine Tags](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%20Alpine%20Tags/badge.svg?branch=release)
 
 Docker image for [EteSync](https://www.etesync.com/) based on the [server](https://github.com/etesync/server) repository by [Tom Hacohen](https://github.com/tasn).
 
