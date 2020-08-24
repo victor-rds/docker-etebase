@@ -6,24 +6,29 @@ if [ ! -z "$@" ]; then
     exec "$@"
 fi
 
+createDatabase() {
+  echo "-------------------------------------------------------------"
+  echo 'Create Database'
+
+  $BASE_DIR/manage.py migrate
+
+  if [ "$SUPER_USER" ]; then
+    echo "-------------------------------------------------------------"
+    if [ -z "$SUPER_PASS" ]; then
+      SUPER_PASS=$(openssl rand -base64 31)
+      echo "Admin Password: $SUPER_PASS"
+    fi
+
+    echo 'Creating Super User'
+    echo "from django.contrib.auth.models import User; User.objects.create_superuser('$SUPER_USER' , '$SUPER_EMAIL', '$SUPER_PASS')" | python manage.py shell
+  fi
+}
+
 if [ ! -e "$ETESYNC_DB_PATH" ] || [ -z "$ETESYNC_DB_PATH/db.sqlite3" ]; then
-    # first run
-	echo "-------------------------------------------------------------"
-	echo 'Create Database'
-
-    $BASE_DIR/manage.py migrate
-	chown -R $PUID:$PGID "$DATA_DIR"
-	
-	if [ "$SUPER_USER" ]; then
-		echo "-------------------------------------------------------------"
-		if [ -z "$SUPER_PASS" ]; then
-			SUPER_PASS=$(openssl rand -base64 31)
-			echo "Admin Password: $SUPER_PASS"
-		fi
-
-		echo 'Creating Super User'
-		echo "from django.contrib.auth.models import User; User.objects.create_superuser('$SUPER_USER' , '$SUPER_EMAIL', '$SUPER_PASS')" | python manage.py shell
-	fi
+  createDatabase
+  chown -R $PUID:$PGID "$DATA_DIR"
+elif [ ! -z "$USE_POSTGRES" ]; then
+  createDatabase
 fi
 
 echo "-------------------------------------------------------------"
