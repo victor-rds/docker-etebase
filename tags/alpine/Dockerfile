@@ -29,9 +29,9 @@ RUN set -e && \
     mkdir -p $CERT_DIR && \
     mkdir -p $STATIC_DIR && \
     tar x -v -z -f $BASE_DIR/${TAG}.tar.gz -C $BASE_DIR --strip-components=1 --exclude */example-configs --exclude */.git* && \
-    apk add --no-cache openssl libressl mailcap && \
-    apk add --no-cache --virtual .build-deps coreutils gcc make linux-headers libc-dev libressl-dev && \
-    pip install -r $BASE_DIR/requirements.txt uwsgi && \
+    apk add --no-cache openssl libressl mailcap libpq && \
+    apk add --no-cache --virtual .build-deps coreutils gcc make linux-headers libc-dev libressl-dev postgresql-dev && \
+    pip install -r $BASE_DIR/requirements.txt uwsgi psycopg2-binary && \
     apk del .build-deps && \
     $BASE_DIR/manage.py collectstatic && \
     mv $BASE_DIR/static $STATIC_DIR/ && \
