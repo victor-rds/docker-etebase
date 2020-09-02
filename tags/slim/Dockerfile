@@ -31,7 +31,7 @@ RUN set -e && \
     tar xvf $BASE_DIR/${TAG}.tar.gz -C $BASE_DIR --strip-components=1 --exclude="example-configs" --exclude-vcs && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libssl-dev && \
-    pip install -r $BASE_DIR/requirements.txt uwsgi && \
+    pip install -r $BASE_DIR/requirements.txt uwsgi psycopg2-binary && \
     apt-get remove --purge -y build-essential && \
 	apt-get autoremove --purge -y && \
     $BASE_DIR/manage.py collectstatic && \

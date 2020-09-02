@@ -29,7 +29,7 @@ RUN set -e && \
     mkdir -p $CERT_DIR && \
     mkdir -p $STATIC_DIR && \
     tar xvf $BASE_DIR/${TAG}.tar.gz -C $BASE_DIR --strip-components=1 --exclude="example-configs" --exclude-vcs && \
-    pip install -r $BASE_DIR/requirements.txt uwsgi && \
+    pip install -r $BASE_DIR/requirements.txt uwsgi psycopg2-binary && \
     $BASE_DIR/manage.py collectstatic && \
     mv $BASE_DIR/static $STATIC_DIR/ && \
     ln -s $STATIC_DIR/static $BASE_DIR/static && \
