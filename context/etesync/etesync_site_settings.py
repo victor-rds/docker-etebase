@@ -14,7 +14,7 @@ TIME_ZONE = os.environ.get('TIME_ZONE', 'UTC')
 
 SECRET_FILE = os.environ.get('SECRET_FILE')
 
-if os.environ.get('USE_POSTGRES', '') == '1':
+if os.environ.get('USE_POSTGRES') is not None:
   DATABASES = {
     'default': {
       'ENGINE': 'django.db.backends.postgresql',
