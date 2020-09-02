@@ -6,14 +6,18 @@ if [ ! -z "$@" ]; then
     exec "$@"
 fi
 
-createDatabase() {
-  echo "-------------------------------------------------------------"
-  echo 'Create Database'
+hLine() { 
+  echo "├─────────────────────────────────────────────────────────────────────"
+}
 
+if $BASE_DIR/manage.py showmigrations -l journal | grep -q ' \[ \] 0001_initial'; then
+  hLine  
+  echo 'Create Database'
   $BASE_DIR/manage.py migrate
+  
 
   if [ "$SUPER_USER" ]; then
-    echo "-------------------------------------------------------------"
+    hLine
     if [ -z "$SUPER_PASS" ]; then
       SUPER_PASS=$(openssl rand -base64 31)
       echo "Admin Password: $SUPER_PASS"
@@ -22,16 +26,13 @@ createDatabase() {
     echo 'Creating Super User'
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('$SUPER_USER' , '$SUPER_EMAIL', '$SUPER_PASS')" | python manage.py shell
   fi
-}
-
-if [ ! -e "$ETESYNC_DB_PATH" ] || [ -z "$ETESYNC_DB_PATH/db.sqlite3" ]; then
-  createDatabase
-  chown -R $PUID:$PGID "$DATA_DIR"
-elif [ ! -z "$USE_POSTGRES" ]; then
-  createDatabase
 fi
 
-echo "-------------------------------------------------------------"
+if [ -z "$USE_POSTGRES" ]; then
+  chown -R $PUID:$PGID "$DATA_DIR"
+fi
+
+hLine
 $BASE_DIR/manage.py showmigrations --list | grep -v '\[X\]'
 
 if [ "$AUTO_MIGRATE" ]; then
@@ -39,7 +40,6 @@ if [ "$AUTO_MIGRATE" ]; then
 else
 	echo "If necessary please run: docker exec -it $HOSTNAME python manage.py migrate"
 fi
-echo "-------------------------------------------------------------"
 
 if [ ! -e "$STATIC_DIR/static/admin" ] || [ ! -e "$STATIC_DIR/static/rest_framework" ]; then
 	echo 'Static files are missing, running manage.py collectstatic...'
@@ -58,6 +58,7 @@ fi
 
 uWSGI='/usr/local/bin/uwsgi --ini etesync.ini'
 
+hLine
 echo 'Starting ETESync'
 
 if [ $SERVER = 'django-server' ]; then
