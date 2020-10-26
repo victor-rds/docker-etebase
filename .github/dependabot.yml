@@ -6,7 +6,7 @@ updates:
       interval: daily
       time: "20:00"
     open-pull-requests-limit: 5
-    target-branch: master
+    target-branch: legacy
   
   - package-ecosystem: docker
     directory: "/tags/slim"
@@ -14,7 +14,7 @@ updates:
       interval: daily
       time: "20:00"
     open-pull-requests-limit: 5
-    target-branch: master
+    target-branch: legacy
 
   - package-ecosystem: docker
     directory: "/tags/alpine"
@@ -22,4 +22,4 @@ updates:
       interval: daily
       time: "20:00"
     open-pull-requests-limit: 5
-    target-branch: master
+    target-branch: legacy

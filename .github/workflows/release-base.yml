@@ -2,19 +2,19 @@ name: Build and Push Base Tags
 
 on:
   push:
-    branches: [ release ]
+    branches: [ legacy ]
     paths:
       - 'context/**'
       - 'tags/base/Dockerfile'
       - '.github/workflows/release-base.yml'
 
 jobs:
-  build-master:
+  build-legacy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: 'release'
+        ref: 'legacy'
     - uses: docker/build-push-action@v1.1.0
       with:
         username: ${{ secrets.DOCKER_USER }}
@@ -24,23 +24,5 @@ jobs:
         add_git_labels: true
         push: true
         dockerfile: ./tags/base/Dockerfile
-        tags: latest
-        build_args: TAG=master
-
-  build-v030:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: 'release'
-    - uses: docker/build-push-action@v1.1.0
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
-        repository: victorrds/etesync
-        always_pull: true
-        add_git_labels: true
-        push: true
-        dockerfile: ./tags/base/Dockerfile
-        tags: v0.3.0
+        tags: legacy,v0.3.0
         build_args: TAG=v0.3.0

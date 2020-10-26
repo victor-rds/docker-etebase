@@ -59,6 +59,13 @@ fi
 uWSGI='/usr/local/bin/uwsgi --ini etesync.ini'
 
 hLine
+echo "
+#######################################################################################
+# This is the Legacy Etesync 1.0 version, please update to Etesync 2.0 a.k.a. Etebase #
+#######################################################################################
+" >> /dev/stderr
+hLine
+
 echo 'Starting ETESync'
 
 if [ $SERVER = 'django-server' ]; then
