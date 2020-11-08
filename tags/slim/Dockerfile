@@ -1,59 +1,57 @@
 FROM python:3.9.0-slim
 
-ARG TAG='master'
+LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
-ENV BASE_DIR /etesync
+ARG PUID=373
+ARG PGID=373
+
+ENV BASE_DIR /etebase
 ENV DATA_DIR /data
-ENV STATIC_DIR /var/www/etesync
+ENV STATIC_ROOT $BASE_DIR/static
+ENV MEDIA_ROOT $BASE_DIR/media
 
-ENV SECRET_FILE $BASE_DIR/secret.txt
-ENV ETESYNC_DB_PATH $DATA_DIR/db.sqlite3
+ENV ETEBASE_EASY_CONFIG_PATH $DATA_DIR/etebase-server.ini
+ENV SECRET_FILE $DATA_DIR/secret.txt
 
-ARG CERT_DIR=/certs
-ENV X509_CRT $CERT_DIR/crt.pem
-ENV X509_KEY $CERT_DIR/key.pem
-
-ENV PUID 1000
-ENV PGID 1000
-ENV PORT 3735
 ENV SERVER="http"
+ENV PORT 3735
+
+COPY --chown=${PUID}:${PGID} server /etebase
+
+# OS packages and deps installation
+RUN set -e && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libffi6 libpq5 libssl1.1 && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libffi-dev libpq-dev libssl-dev && \
+    pip install -r $BASE_DIR/requirements.txt uwsgi daphne 'Twisted[tls,http2]' && \
+    apt-get remove --purge -y build-essential libffi-dev libpq-dev libssl-dev && \
+    apt-get autoremove --purge -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# Etebase directories and user setup 
+RUN set -e && \
+    addgroup --system --gid ${PGID} etebase && \
+    adduser --system --no-create-home --disabled-password \
+    --gecos '' --home $BASE_DIR --ingroup etebase --uid ${PUID} etebase && \
+    mkdir -p $DATA_DIR $STATIC_ROOT $MEDIA_ROOT && \
+    chown -R ${PUID}:${PGID} $DATA_DIR $MEDIA_ROOT $STATIC_ROOT && \
+    chmod 750 $DATA_DIR
+
+COPY --chown=${PUID}:${PGID} context /
+
+USER etebase:etebase
 
 WORKDIR $BASE_DIR
 
-ADD https://github.com/etesync/server-skeleton/archive/${TAG}.tar.gz $BASE_DIR
-
+# Etebase collect static
 RUN set -e && \
-    groupadd -r -g $PGID etesync && \
-	useradd -d $BASE_DIR -r -M -s /bin/sh -g $PGID -u $PUID etesync && \
-    mkdir -p $DATA_DIR && \
-    mkdir -p $CERT_DIR && \
-    mkdir -p $STATIC_DIR && \
-    tar xvf $BASE_DIR/${TAG}.tar.gz -C $BASE_DIR --strip-components=1 --exclude="example-configs" --exclude-vcs && \
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libssl-dev && \
-    pip install -r $BASE_DIR/requirements.txt uwsgi psycopg2-binary && \
-    apt-get remove --purge -y build-essential && \
-	apt-get autoremove --purge -y && \
-    $BASE_DIR/manage.py collectstatic && \
-    mv $BASE_DIR/static $STATIC_DIR/ && \
-    ln -s $STATIC_DIR/static $BASE_DIR/static && \
-    rm $BASE_DIR/${TAG}.tar.gz $BASE_DIR/requirements.txt $SECRET_FILE && \
-    rm -rf /var/lib/apt/lists/* && \
-    chown -h etesync:etesync $BASE_DIR/static && \
-    chown -R etesync:etesync $STATIC_DIR && \
-    chmod -R a=rX $STATIC_DIR && \
-    chown -R etesync:etesync $DATA_DIR && \
-    chmod -R ug=rwX $DATA_DIR && \
-    chown -R etesync:etesync $BASE_DIR && \
-    chmod -R ug=rwX $BASE_DIR
+    $BASE_DIR/manage.py collectstatic --no-input && \
+    rm $BASE_DIR/secret.txt
 
-COPY --chown=etesync:etesync context /
-
-# Fix permissions
-RUN chown root:root /entrypoint.sh && \
-    chmod a=rx /entrypoint.sh
-
-VOLUME $DATA_DIR
+ENV ETEBASE_EASY_CONFIG_PATH $DATA_DIR/etebase-server.ini
+ENV SECRET_FILE $DATA_DIR/secret.txt
+ENV SERVER="http"
+ENV PORT 3735
 
 EXPOSE 3735
 
