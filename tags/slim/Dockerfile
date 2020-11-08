@@ -19,6 +19,7 @@ ENV PORT 3735
 COPY --chown=${PUID}:${PGID} server /etebase
 
 # OS packages and deps installation
+# hadolint ignore=DL3008,DL3018
 RUN set -e && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libffi6 libpq5 libssl1.1 && \

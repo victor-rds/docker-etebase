@@ -19,6 +19,7 @@ ENV PORT 3735
 COPY --chown=${PUID}:${PGID} server /etebase
 
 # OS packages and deps installation
+# hadolint ignore=DL3008,DL3018
 RUN set -e && \
     pip install -r $BASE_DIR/requirements.txt uwsgi daphne 'Twisted[tls,http2]'
 

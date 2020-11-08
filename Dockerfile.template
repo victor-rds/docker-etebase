@@ -1,3 +1,4 @@
+# hadolint ignore=DL3006
 FROM python
 LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
@@ -18,6 +19,7 @@ ENV PORT 3735
 COPY --chown=${PUID}:${PGID} server /etebase
 
 # OS packages and deps installation
+# hadolint ignore=DL3008,DL3018
 #%%_RUN_OS_CMD_%%
 
 # Etebase directories and user setup 

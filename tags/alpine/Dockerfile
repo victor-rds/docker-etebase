@@ -19,6 +19,7 @@ ENV PORT 3735
 COPY --chown=${PUID}:${PGID} server /etebase
 
 # OS packages and deps installation
+# hadolint ignore=DL3008,DL3018
 RUN set -e && \
     apk add --no-cache openssl libressl mailcap libpq libffi bash && \
     apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev libressl-dev postgresql-dev && \
