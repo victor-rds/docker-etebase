@@ -1,23 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directory: "/tags/base"
-    schedule:
-      interval: daily
-      time: "20:00"
-    open-pull-requests-limit: 5
-    target-branch: master
-  
-  - package-ecosystem: docker
-    directory: "/tags/slim"
-    schedule:
-      interval: daily
-      time: "20:00"
-    open-pull-requests-limit: 5
-    target-branch: master
-
-  - package-ecosystem: docker
-    directory: "/tags/alpine"
+    directory: "/tags"
     schedule:
       interval: daily
       time: "20:00"
