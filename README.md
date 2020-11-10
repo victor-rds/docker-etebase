@@ -3,14 +3,13 @@
 </p>
 
 # Etebase Sever Docker Images
-
-![Build and Push Base Tags](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%20Base%20Tags/badge.svg?branch=release)
-![Build and Push Slim Tags](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%20Slim%20Tags/badge.svg?branch=release)
-![Build and Push Alpine Tags](https://github.com/victor-rds/docker-etesync-server/workflows/Build%20and%20Push%20Alpine%20Tags/badge.svg?branch=release)
+![Debian Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Images/badge.svg)
+![Debian Slim Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Slim%20Images/badge.svg)
+![Alpine Images](https://github.com/victor-rds/docker-etesync-server/workflows/Alpine%20Images/badge.svg)
 
 Docker image for **[Etebase](https://www.etebase.com) Server**, also known as **Etesync 2.0**, based on the [server](https://github.com/etesync/server) repository by [Tom Hacohen](https://github.com/tasn).
 
-## **Warning :bangbang:** Incompatible Versions
+## **:bangbang: Warning** Incompatible Versions
 
 **Etesync 1.0 and Etebase (Etesync 2.0) database and server are incompatible**, given the end-to-end encryption nature and strucutural changes of this software is impossible to migrate the data withou knowing the users keys.
 
@@ -22,15 +21,11 @@ The new images have breaking changes, to avoid any damage, the entrypoint will c
 
 The following tags are built on latest python image and master branch of EteSync Server 
 
-- `latest` [(release:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/base/Dockerfile)
-- `slim`  [(release:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/slim/Dockerfile)
-- `alpine` [(release:tags/alpine/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/release/tags/alpine/Dockerfile)
+- `latest` [(master:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/base/Dockerfile)
+- `slim`  [(master:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/slim/Dockerfile)
+- `alpine` [(master:tags/alpine/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/alpine/Dockerfile)
 
-Release builds are available as versioned tags
-
-- `0.5.1`
-- `0.5.1-slim`
-- `0.5.1-alpine`
+Release builds are available as versioned tags, for example: `X.Y.Z` or `X.Y.Z-type`
 
 Etesync 1.0 are avaible through the `legacy` tags, I will try to keep python base image up to date but no more work will be done.
 
