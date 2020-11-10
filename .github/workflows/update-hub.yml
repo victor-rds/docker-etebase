@@ -1,0 +1,21 @@
+---
+name: Update Docker Hub Description
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - README.md
+      - .github/workflows/update-hub.yml
+jobs:
+  docker-hub-update:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Docker Hub Description
+      uses: peter-evans/dockerhub-description@v2.4.1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+        repository: victorrds/etebase
