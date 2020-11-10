@@ -1,0 +1,48 @@
+name: 'Get Data'
+description: 'Get Version, Etebase REF and List of Tags'
+inputs:
+  flavour:
+    description: 'Tag flavour'
+    required: false
+outputs:
+  version: 
+    description: "Version of the Image"
+    value: ${{ steps.get_data.outputs.version }}
+  etebase_ref: 
+    description: "Etebase Ref for Git Checkout"
+    value: ${{ steps.get_data.outputs.etebase_ref }}
+  tags: 
+    description: "List of Tags"
+    value: ${{ steps.get_data.outputs.tags }}
+runs:
+  using: "composite"
+  steps: 
+    - id: get_data
+      env:
+        FLAVOUR: ${{ inputs.flavour }}
+        ETESYNC_IMG: victorrds/etesync
+        ETEBASE_IMG: victorrds/etebase
+      shell: bash
+      run: |
+        ETEBASE_REF=master
+        VERSION="nightly"
+        _SUFFIX=""
+        TAGS=""
+
+        if [ -z "$FLAVOUR" ]; then
+          TAGS="${ETESYNC_IMG}:latest,${ETEBASE_IMG}:latest"
+        else
+          TAGS="${ETESYNC_IMG}:${FLAVOUR},${ETEBASE_IMG}:${FLAVOUR}"
+          _SUFFIX="-${FLAVOUR}"
+        fi
+
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+          ETEBASE_REF=v${VERSION}
+
+          TAGS="${TAGS},${ETESYNC_IMG}:${VERSION}${_SUFFIX},${ETEBASE_IMG}:${VERSION}${_SUFFIX}"
+        fi
+
+        echo ::set-output name=version::${VERSION}
+        echo ::set-output name=etebase_ref::${ETEBASE_REF}
+        echo ::set-output name=tags::${TAGS}
