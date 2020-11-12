@@ -1,0 +1,32 @@
+version: "3"
+
+#volumes:
+  #certs:
+
+services:
+
+  etebase:
+    labels:
+      traefik.http.routers.etebase.rule: "Host(`etebase.localhost`)"
+      traefik.http.routers.etebase.entrypoints: "websecure"
+      traefik.http.routers.etebase.service: "etebase"
+      traefik.http.routers.etebase.tls: "true"
+
+  traefik:
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      #- "--entrypoints.websecure.http.tls.certResolver=http-01"
+      #- "--certificatesresolvers.http-01.acme.httpchallenge=true"
+      #- "--certificatesresolvers.http-01.acme.httpchallenge.entrypoint=web"
+      #- "--certificatesresolvers.http-01.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      #- "--certificatesresolvers.http-01.acme.email=postmaster@mydomain.com"
+      #- "--certificatesresolvers.http-01.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443"
+    #volumes:
+      #- certs:/letsencrypt
