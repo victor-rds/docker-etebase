@@ -1,0 +1,49 @@
+version: '3'
+
+volumes:
+  etebase_static:
+  postgres_data:
+
+services:
+  etebase:
+    image: victorrds/etesync:etebase
+    container_name: "etebase"
+    volumes:
+      - etebase_static:${STATIC_PATH}:rw
+    environment:
+      SERVER: asgi
+      SUPER_USER: ${ADMIN_USER}
+      SUPER_PASS: ${ADMIN_PASS}
+      DB_ENGINE: postgres
+      DATABASE_NAME: ${DB_NAME}
+      DATABASE_USER: ${DB_USER}
+      DATABASE_PASSWORD: ${DB_PASS}
+      DATABASE_HOST: postgres
+    depends_on:
+      - postgres
+    restart: always
+
+  nginx:
+    image: nginx:stable
+    container_name: "nginx"
+    volumes:
+      - etebase_static:${STATIC_PATH}:ro
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - etebase
+    restart: always
+
+  postgres:
+    image: postgres:13
+    container_name: "postgres"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    restart: always
+
+  

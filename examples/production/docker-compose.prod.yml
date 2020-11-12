@@ -1,0 +1,23 @@
+version: '3'
+
+volumes:
+  certs:
+
+services:
+  certs_gen:
+    image: governmentpaas/curl-ssl
+    container_name: ""
+    volumes:
+      - certs:/certs:rw
+    command: > 
+      sh -c " echo "${CERT_DOMAIN}" && 
+      openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout /certs/key.pem -out /certs/cert.pem -subj '/CN=${CERT_DOMAIN}' && 
+      curl https://ssl-config.mozilla.org/ffdhe2048.txt > /certs/dhparam"
+
+  nginx:
+    volumes:
+      - ./default-ssl.conf:/etc/nginx/conf.d/default.conf
+      - certs:/certs:ro
+    ports:
+      - "443:443"
+      - "80:80"
