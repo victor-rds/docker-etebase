@@ -29,8 +29,9 @@ RUN set -e && \
     addgroup --system --gid ${PGID} etebase && \
     adduser --system --no-create-home --disabled-password \
     --gecos '' --home $BASE_DIR --ingroup etebase --uid ${PUID} etebase && \
-    mkdir -p $DATA_DIR $WEB_DIR/static $WEB_DIR/media && \
-    chown -R ${PUID}:${PGID} $DATA_DIR $WEB_DIR && \
+    mkdir -p $DATA_DIR $WEB_DIR/static $WEB_DIR/media /etc/etebase-server && \
+    ln -s ${ETEBASE_EASY_CONFIG_PATH} /etc/etebase-server/etebase-server.ini && \
+    chown -R ${PUID}:${PGID} $DATA_DIR $WEB_DIR /etc/etebase-server && \
     chmod 750 $DATA_DIR && \
     $BASE_DIR/manage.py collectstatic --no-input && \
     rm $BASE_DIR/secret.txt
