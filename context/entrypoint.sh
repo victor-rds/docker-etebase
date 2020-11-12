@@ -72,8 +72,8 @@ init_env() {
     elif [ "${_DB_FILENAME##*.}" != 'sqlite3' ]; then
       DATABASE_NAME="${DATABASE_NAME}/db.sqlite3"
     fi
-  elif [ "${DB_ENGINE}" = "postgres" ] && [ -z "${DATABASE_NAME}" ]; then
-    DATABASE_NAME='etebase'
+  elif [ "${DB_ENGINE}" = "postgres" ]; then
+    : ${DATABASE_NAME:=etebase}
   else
     dckr_error "Database option not supported!"
   fi
@@ -242,7 +242,7 @@ case "${SERVER}" in
   _CMD="${MANAGE} runserver 0.0.0.0:${PORT}"
   ;;
 'asgi' | 'daphne')
-  _CMD="daphne -b 0.0.0.0 -p ${PORT} dckr_server.asgi:application"
+  _CMD="daphne -b 0.0.0.0 -p ${PORT} etebase_server.asgi:application"
   ;;
 'uwsgi')
   _CMD="${uWSGI}:uwsgi"
