@@ -83,6 +83,35 @@ init_env() {
   fi
 }
 
+check_permissions() {
+
+  if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] && ! ([ -d "${DATA_DIR}" ] && [ -w "${DATA_DIR}" ]); then
+    dckr_error "
+-----------------------------------------------------------------
+Wrong permissions on /data, can't create settings file, without
+the correct permissions the container won't start.
+Please change the permissions or the user runnning the container.
+By default the image runs with 373 as UID and GID.
+More details about changing container user:
+https://docs.docker.com/engine/reference/run/#user
+-----------------------------------------------------------------"
+  elif [ -e "${ETEBASE_EASY_CONFIG_PATH}" ] && [ ! -r "${ETEBASE_EASY_CONFIG_PATH}" ]; then
+    dckr_error "Failed to read on the ${ETEBASE_EASY_CONFIG_PATH} settings file, please check the permissions"
+  else
+    dckr_note "Settings file permissions: Ok"
+  fi
+
+  if [ "${DB_ENGINE}" = "sqlite" ]; then
+    if [ ! -e "${DATABASE_NAME}" ] && ! ([ -d "${DATA_DIR}" ] && [ -w "${DATA_DIR}" ]); then
+      dckr_error "Failed to create on the ${DATABASE_NAME} databbase file, please check the permissions"
+    elif [ -e "${DATABASE_NAME}" ] && [ ! -w "${DATABASE_NAME}" ]; then
+      dckr_error "Failed to write on the ${DATABASE_NAME} file, please check the permissions"
+    else
+      dckr_note "Database file permissions: Ok"
+    fi
+  fi
+}
+
 gen_inifile() {
 
   echo "[global]
@@ -189,6 +218,8 @@ https://github.com/etesync/server#updating-from-version-050-or-before
 }
 
 init_env
+
+check_permissions
 
 if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] || [ ! -z "${REGEN_INI}" ]; then
   gen_inifile
