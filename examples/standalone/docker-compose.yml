@@ -1,0 +1,18 @@
+version: "3"
+
+volumes:
+  etebase_data:
+
+services:
+  etebase:
+    image: victorrds/etesync:etebase
+    container_name: "etebase"
+    volumes:
+      - etebase_data:/data:rw
+    environment:
+      SERVER: http
+      SUPER_USER: admin
+      SUPER_PASS: Change_M3
+    restart: always
+    ports:
+      - "80:80"
