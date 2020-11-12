@@ -42,8 +42,9 @@ init_env() {
   : ${LANGUAGE_CODE:=en-us}
   : ${TIME_ZONE:=UTC}
   : ${ALLOWED_HOSTS:=*}
-  : ${X509_CRT:=$DATA_DIR/certs/crt.pem}
-  : ${X509_KEY:=$DATA_DIR/certs/key.pem} 
+
+  declare -g -x X509_CRT=${X509_CRT:=$DATA_DIR/certs/crt.pem}
+  declare -g -x X509_KEY=${X509_KEY:=$DATA_DIR/certs/key.pem}
 
   file_env 'DB_ENGINE' 'sqlite'
   file_env 'DATABASE_NAME'
