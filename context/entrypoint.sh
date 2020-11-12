@@ -33,8 +33,7 @@ file_env() {
   local fileVar="${var}_FILE"
   local def="${2:-}"
   if [ "${!var:-}" ] && [ "${!fileVar:-}" ]; then
-    echo >&2 "error: both $var and $fileVar are set (but are exclusive)"
-    exit 1
+    dckr_error "error: both $var and $fileVar are set (but are exclusive)"
   fi
   local val="$def"
   if [ "${!var:-}" ]; then
@@ -50,9 +49,8 @@ init_env() {
   declare -g -x PUID="$(id -u)"
   declare -g -x PGID="$(id -g)"
 
-  if ! ([ "$PUID" -gt 0 ] 2>/dev/null && [ "$PGID" -gt 0 ] 2>/dev/null); then
-    echo "PUID or GUID values not supported!" >>/dev/stderr
-    exit 29
+  if ! ([ "${PUID}" -gt 0 ] 2>/dev/null && [ "${PGID}" -gt 0 ] 2>/dev/null); then
+    dckr_error "PUID or GUID values not supported!"
   fi
 
   : ${DEBUG:=false}
@@ -66,24 +64,22 @@ init_env() {
   file_env 'DB_ENGINE' 'sqlite'
   file_env 'DATABASE_NAME'
 
-  if [ "$DB_ENGINE" = "sqlite" ]; then
-    local _DB_FILENAME="$(basename "$DATABASE_NAME")"
+  if [ "${DB_ENGINE}" = "sqlite" ]; then
+    local _DB_FILENAME="$(basename "${DATABASE_NAME}")"
 
-    if [ -z "$_DB_FILENAME" ]; then
+    if [ -z "${_DB_FILENAME}" ]; then
       DATABASE_NAME="${DATA_DIR}/db.sqlite3"
     elif [ "${_DB_FILENAME##*.}" != 'sqlite3' ]; then
       DATABASE_NAME="${DATABASE_NAME}/db.sqlite3"
     fi
-  elif [ "$DB_ENGINE" = "postgres" ] && [ -z "$DATABASE_NAME" ]; then
+  elif [ "${DB_ENGINE}" = "postgres" ] && [ -z "${DATABASE_NAME}" ]; then
     DATABASE_NAME='etebase'
   else
-    echo "Database option not supported!" >>/dev/stderr
-    exit 219
+    dckr_error "Database option not supported!"
   fi
 
-  if [ "$PORT" -lt "1024" ]; then
-    echo "Only root can use ports below 1024" >>/dev/stderr
-    exit 90
+  if [ "${PORT}" -lt "1024" ]; then
+    dckr_error "Only root can use ports below 1024"
   fi
 }
 
@@ -103,9 +99,9 @@ time_zone = ${TIME_ZONE}
 allowed_host1 = ${ALLOWED_HOSTS}
 " >$ETEBASE_EASY_CONFIG_PATH
 
-  if [ "$DB_ENGINE" = "postgres" ]; then
-    file_env 'DATABASE_USER' "$DATABASE_NAME"
-    file_env 'DATABASE_PASSWORD' "$DATABASE_USER"
+  if [ "${DB_ENGINE}" = "postgres" ]; then
+    file_env 'DATABASE_USER' "${DATABASE_NAME}"
+    file_env 'DATABASE_PASSWORD' "${DATABASE_USER}"
 
     echo "[database]
 engine = django.db.backends.postgresql
@@ -121,6 +117,8 @@ engine = django.db.backends.sqlite3
 name = ${DATABASE_NAME}
 " >>$ETEBASE_EASY_CONFIG_PATH
   fi
+
+  dckr_note "Generated ${ETEBASE_EASY_CONFIG_PATH}"
 }
 
 migrate() {
@@ -128,39 +126,43 @@ migrate() {
 
   $MANAGE showmigrations -l | grep -v '\[X\]'
 
-  if [ ! -z "$_AUTO" ]; then
+  if [ ! -z "${_AUTO}" ]; then
     $MANAGE migrate
   else
-    echo "If necessary please run: docker exec -it $HOSTNAME python manage.py migrate"
+    dckr_warn "If necessary please run: docker exec -it ${HOSTNAME} python manage.py migrate"
   fi
 }
 
 create_superuser() {
   file_env 'SUPER_USER'
 
-  if [ "$SUPER_USER" ]; then
+  if [ "${SUPER_USER}" ]; then
+    dckr_note 'Creating Super User'
     file_env 'SUPER_PASS'
     file_env 'SUPER_EMAIL'
 
     if [ -z "$SUPER_PASS" ]; then
-      SUPER_PASS=$(openssl rand -base64 31)
-      echo "Admin Password: $SUPER_PASS"
+      SUPER_PASS=$(openssl rand -base64 24)
+      dckr_note "
+----------------------------------------------------
+| Admin Password: ${SUPER_PASS} |
+----------------------------------------------------"
     fi
 
-    echo 'Creating Super User'
-    echo "from myauth.models import User; User.objects.create_superuser('$SUPER_USER' , None, '$SUPER_PASS')" | python manage.py shell
+    echo "from myauth.models import User; User.objects.create_superuser('${SUPER_USER}' , None, '${SUPER_PASS}')" | python manage.py shell
   fi
 }
 
 generate_certs() {
-  echo "TLS is enabled, however neither the certificate nor the key were found!"
-  echo "The correct paths are '$X509_CRT' and '$X509_KEY'"
-  echo "Let's generate a self-sign certificate, but this isn't recommended"
+  dckr_warn "
+TLS is enabled, however neither the certificate nor the key were found!
+The correct paths are '${X509_CRT}' and '${X509_KEY}'
+Let's generate a self-sign certificate, but this isn't recommended"
 
   local CERTS_DIR=$(dirname $X509_CRT)
 
-  if [ ! -d "$CERTS_DIR" ]; then
-    mkdir -p "$CERTS_DIR"
+  if [ ! -d "${CERTS_DIR}" ]; then
+    mkdir -p "${CERTS_DIR}"
   fi
 
   openssl req -x509 -nodes -newkey rsa:2048 -keyout $X509_KEY -out $X509_CRT -days 365 -subj "/CN=${HOSTNAME}"
@@ -177,21 +179,19 @@ check_db() {
   elif [ ${_PS[0]} -eq "0" ] && [ ${_PS[1]} -ne "0" ]; then
     migrate "${AUTO_UPATE}"
   else
-    echo "
-#########################################################################
-# This database schema is not compatible with Etebase (EteSync 2.0)     #
-# To avoid any data damage the container will now fail to start         #
-# Please save your data follow this instructions instructions:          #
-# https://github.com/etesync/server#updating-from-version-050-or-before #
-#########################################################################
-" >>/dev/stderr
-    exit 231
+    dckr_error "
+---------------------------------------------------------------------
+This database schema is not compatible with Etebase (EteSync 2.0)
+To avoid any data damage the container will now fail to start
+Please save your data follow this instructions instructions:
+https://github.com/etesync/server#updating-from-version-050-or-before
+---------------------------------------------------------------------"
   fi
 }
 
 init_env
 
-if [ ! -e "$ETEBASE_EASY_CONFIG_PATH" ] || [ ! -z "$REGEN_INI" ]; then
+if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] || [ ! -z "${REGEN_INI}" ]; then
   gen_inifile
 fi
 
@@ -199,20 +199,20 @@ check_db
 
 $MANAGE collectstatic --no-input
 
-if [ $SERVER = 'https' ] && { [ ! -e "$X509_CRT" ] || [ ! -e "$X509_KEY" ]; }; then
+if [ "${SERVER}" = 'https' ] && { [ ! -e "${X509_CRT}" ] || [ ! -e "${X509_KEY}" ]; }; then
   generate_certs
 fi
 
-echo 'Starting Etebase'
+dckr_note 'Starting Etebase'
 
 declare _CMD=""
 
-case "$SERVER" in
+case "${SERVER}" in
 'django-server')
-  _CMD="$MANAGE runserver 0.0.0.0:$PORT"
+  _CMD="${MANAGE} runserver 0.0.0.0:${PORT}"
   ;;
 'asgi' | 'daphne')
-  _CMD="daphne -b 0.0.0.0 -p $PORT etebase_server.asgi:application"
+  _CMD="daphne -b 0.0.0.0 -p ${PORT} dckr_server.asgi:application"
   ;;
 'uwsgi')
   _CMD="${uWSGI}:uwsgi"
@@ -227,8 +227,7 @@ case "$SERVER" in
   _CMD="${uWSGI}:http"
   ;;
 *)
-  echo "Server option not supported!" >>/dev/stderr
-  exit 94
+  dckr_error "Server option not supported!"
   ;;
 esac
 
