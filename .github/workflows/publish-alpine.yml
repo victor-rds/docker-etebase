@@ -1,5 +1,5 @@
 ---
-name: Alpine Image
+name: Alpine Images
 
 on:
   push:
