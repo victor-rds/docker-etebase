@@ -7,8 +7,10 @@ ARG PGID=373
 
 ENV BASE_DIR /etebase
 ENV DATA_DIR /data
-ENV STATIC_ROOT $BASE_DIR/static
-ENV MEDIA_ROOT $BASE_DIR/media
+
+ENV WEB_DIR /srv/etebase
+ENV STATIC_ROOT $WEB_DIR/static
+ENV MEDIA_ROOT $WEB_DIR/media
 
 ENV ETEBASE_EASY_CONFIG_PATH $DATA_DIR/etebase-server.ini
 ENV SECRET_FILE $DATA_DIR/secret.txt
@@ -28,20 +30,18 @@ RUN set -e && \
     addgroup --system --gid ${PGID} etebase && \
     adduser --system --no-create-home --disabled-password \
     --gecos '' --home $BASE_DIR --ingroup etebase --uid ${PUID} etebase && \
-    mkdir -p $DATA_DIR $STATIC_ROOT $MEDIA_ROOT && \
-    chown -R ${PUID}:${PGID} $DATA_DIR $MEDIA_ROOT $STATIC_ROOT && \
-    chmod 750 $DATA_DIR
+    mkdir -p $DATA_DIR $WEB_DIR/static $WEB_DIR/media /etc/etebase-server && \
+    ln -s ${ETEBASE_EASY_CONFIG_PATH} /etc/etebase-server/etebase-server.ini && \
+    chown -R ${PUID}:${PGID} $DATA_DIR $WEB_DIR /etc/etebase-server && \
+    chmod 750 $DATA_DIR && \
+    $BASE_DIR/manage.py collectstatic --no-input && \
+    rm $BASE_DIR/secret.txt
 
 COPY --chown=${PUID}:${PGID} context /
 
 USER etebase:etebase
 
 WORKDIR $BASE_DIR
-
-# Etebase collect static
-RUN set -e && \
-    $BASE_DIR/manage.py collectstatic --no-input && \
-    rm $BASE_DIR/secret.txt
 
 EXPOSE 3735
 
