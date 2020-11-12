@@ -7,6 +7,23 @@ fi
 declare -r MANAGE="$BASE_DIR/manage.py"
 declare -r uWSGI='/usr/local/bin/uwsgi --ini /uwsgi-etebase.ini'
 
+# logging functions
+dckr_log() {
+  local type="$1"
+  shift
+  printf '%s [%s] [Entrypoint]: %s\n' "$(date -Iseconds)" "${type}" "$*"
+}
+dckr_note() {
+  dckr_log Note "$@"
+}
+dckr_warn() {
+  dckr_log Warn "$@" >&2
+}
+dckr_error() {
+  dckr_log ERROR "$@" >&2
+  exit 1
+}
+
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
