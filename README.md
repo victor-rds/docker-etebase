@@ -21,9 +21,9 @@ The new images have breaking changes, to avoid any damage, the entrypoint will c
 
 The following tags are built on latest python image and master branch of EteSync Server 
 
-- `latest` [(master:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/base/Dockerfile)
-- `slim`  [(master:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/slim/Dockerfile)
-- `alpine` [(master:tags/alpine/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/master/tags/alpine/Dockerfile)
+- `latest` [(tags/latest/Dockerfile)](tags/base/Dockerfile)
+- `slim`  [(tags/slim/Dockerfile)](tags/slim/Dockerfile)
+- `alpine` [(tags/alpine/Dockerfile)](tags/alpine/Dockerfile)
 
 Release builds are available as versioned tags, for example: `X.Y.Z` or `X.Y.Z-type`
 
@@ -38,6 +38,8 @@ Etesync 1.0 are avaible through the `legacy` tags, I will try to keep python bas
 ```docker run  -d -e SUPER_USER=admin -p 80:3735 -v /path/on/host:/data victorrds/etesync```
 
 Create a container running EteSync using http protocol.
+
+You can find more examples, using `docker-compose` [here](examples/)
 
 ## Settings and Customization
 
@@ -92,7 +94,7 @@ As an alternative to passing sensitive information via environment variables, _F
 $ docker run --name etebase -e DB_ENGINE=postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d victorrds/etesync
 ```
 
-Currently, this is only supported for DB_ENGINE, DATABASE_NAME, DATABASE_USER, and DATABASE_PASSWORD.
+Currently, this is only supported for DB_ENGINE, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, SUPER_USER and SUPER_PASS.
 
 ## Ports
 
