@@ -18,7 +18,7 @@ The `.env` file contains the variables used on `docker-compose.yml`, you can edi
 docker-compose up
 ```
 
-When ready, access:  [http://localhost:8080/admin]
+When ready, access:  [http://localhost:8080/admin](http://localhost/admin)
 
 ## Advanced Security Example
 This one will also run a 4th service a `governmentpaas/curl-ssl` container to create cerficates and download a dhparam from mozilla (*do not generate certificates this way in a production envirioment!*),  to test this just run:

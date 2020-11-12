@@ -6,7 +6,7 @@ volumes:
 
 services:
   etebase:
-    image: victorrds/etesync:etebase
+    image: victorrds/etesync:alpine
     container_name: "etebase"
     volumes:
       - etebase_static:${STATIC_PATH}:rw
@@ -24,7 +24,7 @@ services:
     restart: always
 
   nginx:
-    image: nginx:stable
+    image: nginx:alpine
     container_name: "nginx"
     volumes:
       - etebase_static:${STATIC_PATH}:ro

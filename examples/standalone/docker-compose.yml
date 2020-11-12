@@ -5,7 +5,7 @@ volumes:
 
 services:
   etebase:
-    image: victorrds/etesync:etebase
+    image: victorrds/etesync:alpine
     container_name: "etebase"
     volumes:
       - etebase_data:/data:rw

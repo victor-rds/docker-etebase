@@ -9,4 +9,4 @@ Just run:
 docker-compose up
 ```
 
-When ready, access: [http://localhost/admin]
+When ready, access: [http://localhost/admin](http://localhost/admin)

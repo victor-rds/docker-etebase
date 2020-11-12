@@ -9,7 +9,7 @@ Just run:
 docker-compose up
 ```
 
-When ready, access: [http://etebase.localhost/admin]
+When ready, access: [http://etebase.localhost/admin](http://etebase.localhost/admin)
 
 ## Advanced Security Example
 Same as above, but using HTTPS and permanent HTTP redirect. The commented sections show options for using the Let's Encrypt HTTP-01 challenge
