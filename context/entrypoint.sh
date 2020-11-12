@@ -139,7 +139,6 @@ create_superuser() {
   if [ "${SUPER_USER}" ]; then
     dckr_note 'Creating Super User'
     file_env 'SUPER_PASS'
-    file_env 'SUPER_EMAIL'
 
     if [ -z "$SUPER_PASS" ]; then
       SUPER_PASS=$(openssl rand -base64 24)
