@@ -24,7 +24,7 @@ COPY --chown=${PUID}:${PGID} server /etebase
 # hadolint ignore=DL3008,DL3018
 RUN set -e && \
     apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libffi6 libpq5 libssl1.1 && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi6 libpq5 libssl1.1 && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libffi-dev libpq-dev libssl-dev && \
     pip install -r $BASE_DIR/requirements.txt uwsgi daphne 'Twisted[tls,http2]' && \
     apt-get remove --purge -y build-essential libffi-dev libpq-dev libssl-dev && \
