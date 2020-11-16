@@ -3,14 +3,14 @@ name: Debian Slim Images
 
 on:
   push:
-    branches:
-      - master
-    paths:
-      - "context/**"
-      - "tags/slim/Dockerfile"
-      - ".github/workflows/publish-slim.yml"
     tags:
       - "[0-9].[0-9].[0-9]"
+#    branches:
+#      - master
+#    paths:
+#      - "context/**"
+#      - "tags/slim/Dockerfile"
+#      - ".github/workflows/publish-slim.yml"
 
 jobs:
   build-push:

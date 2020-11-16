@@ -3,14 +3,14 @@ name: Alpine Images
 
 on:
   push:
-    branches:
-      - master
-    paths:
-      - "context/**"
-      - "tags/alpine/Dockerfile"
-      - ".github/workflows/publish-alpine.yml"
     tags:
       - "[0-9].[0-9].[0-9]"
+#    branches:
+#      - master
+#    paths:
+#      - "context/**"
+#      - "tags/alpine/Dockerfile"
+#      - ".github/workflows/publish-alpine.yml"
 
 jobs:
   build-push:
