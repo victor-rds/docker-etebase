@@ -7,6 +7,27 @@ fi
 declare -r MANAGE="$BASE_DIR/manage.py"
 declare -r uWSGI='/usr/local/bin/uwsgi --ini /uwsgi-etebase.ini'
 
+declare -r C_UID="$(id -u)"
+declare -r C_GID="$(id -g)"
+
+declare -r ERROR_PERM_TEMPLATE="
+-----------------------------------------------------------------
+Wrong permissions in: %s
+%s
+Please check the permissions or the user runnning the container.
+Current user id: ${C_UID} | Current group id: ${C_GID}
+More details about changing container user:
+https://docs.docker.com/engine/reference/run/#user
+-----------------------------------------------------------------"
+
+declare -r ERROR_DB_TEMPLATE='
+---------------------------------------------------------------------
+%bThis database schema is not compatible with Etebase (EteSync 2.0)
+To avoid any data damage the container will now fail to start
+Please save your data follow this instructions instructions:
+https://github.com/etesync/server#updating-from-version-050-or-before
+---------------------------------------------------------------------'
+
 # logging functions
 dckr_log() {
   local type="$1"
@@ -22,6 +43,11 @@ dckr_warn() {
 dckr_error() {
   dckr_log ERROR "$@" >&2
   exit 1
+}
+
+root_fix_perm() {
+  chown ${PGID}:${GID} "${1}"
+  chmod u=rwX,g=rX,o-rwx "${1}"
 }
 
 # usage: file_env VAR [DEFAULT]
@@ -46,8 +72,19 @@ file_env() {
 }
 
 init_env() {
-  declare -g -x PUID="$(id -u)"
-  declare -g -x PGID="$(id -g)"
+
+  if [ "${C_UID}" -gt '0' ]; then
+    declare -g -x PUID=${C_UID}
+    declare -g -x PGID=${C_GID}
+  else
+    declare -g -x PUID=${PUID:-373}
+    declare -g -x PGID=${PGID:-373}
+    dckr_warn "Running container as Root is not recommended, please avoid if possible."
+
+    if [[ "${cms}" == @(asgi|daphne|django-server) ]]; then
+      dckr_warn "Daphne and Django Built-in Server does not support PUID/PGID change, please uWSGI."
+    fi
+  fi
 
   if ! ([ "${PUID}" -gt 0 ] 2>/dev/null && [ "${PGID}" -gt 0 ] 2>/dev/null); then
     dckr_error "PUID or GUID values not supported!"
@@ -78,37 +115,33 @@ init_env() {
     dckr_error "Database option not supported!"
   fi
 
-  if [ "${PORT}" -lt "1024" ]; then
+  if [ "${PORT}" -lt "1024" ] && [ "${C_UID}" -ne '0' ]; then
     dckr_error "Only root can use ports below 1024"
   fi
 }
 
-check_permissions() {
+check_perms() {
+  local FILE_PATH="${1}"
+  local DIR_PATH="$(dirname ${1})"
+  local PERM_TYPE=${2}
 
-  if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] && ! ([ -d "${DATA_DIR}" ] && [ -w "${DATA_DIR}" ]); then
-    dckr_error "
------------------------------------------------------------------
-Wrong permissions on /data, can't create settings file, without
-the correct permissions the container won't start.
-Please change the permissions or the user runnning the container.
-By default the image runs with 373 as UID and GID.
-More details about changing container user:
-https://docs.docker.com/engine/reference/run/#user
------------------------------------------------------------------"
-  elif [ -e "${ETEBASE_EASY_CONFIG_PATH}" ] && [ ! -r "${ETEBASE_EASY_CONFIG_PATH}" ]; then
-    dckr_error "Failed to read on the ${ETEBASE_EASY_CONFIG_PATH} settings file, please check the permissions"
-  else
-    dckr_note "Settings file permissions: Ok"
-  fi
-
-  if [ "${DB_ENGINE}" = "sqlite" ]; then
-    if [ ! -e "${DATABASE_NAME}" ] && ! ([ -d "${DATA_DIR}" ] && [ -w "${DATA_DIR}" ]); then
-      dckr_error "Failed to create on the ${DATABASE_NAME} databbase file, please check the permissions"
-    elif [ -e "${DATABASE_NAME}" ] && [ ! -w "${DATABASE_NAME}" ]; then
-      dckr_error "Failed to write on the ${DATABASE_NAME} file, please check the permissions"
+  if [ "${C_UID}" -ne '0' ]; then
+    if [ ! -e "${FILE_PATH}" ] && [ ! -w "${DIR_PATH}" ]; then
+      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${DIR_PATH}" "Cannot create ${FILE_PATH} file")"
+    elif [ -e "${FILE_PATH}" ] && [ "${PERM_TYPE}" = 'w' ] && [ ! -w "${FILE_PATH}" ]; then
+      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" 'Cannot write on file')"
+    elif [ -e "${FILE_PATH}" ] && [ ! -r "${FILE_PATH}" ]; then
+      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" 'Cannot read the file')"
     else
-      dckr_note "Database file permissions: Ok"
+      dckr_note "File permissions: Ok"
     fi
+  else
+    if [ -e "${FILE_PATH}" ]; then
+      root_fix_perm "${FILE_PATH}"
+    else
+      root_fix_perm "${DIR_PATH}"
+    fi
+    dckr_note "File permissions: Ok"
   fi
 }
 
@@ -207,19 +240,24 @@ check_db() {
   elif [ ${_PS[0]} -eq "0" ] && [ ${_PS[1]} -ne "0" ]; then
     migrate "${AUTO_UPATE}"
   else
-    dckr_error "
----------------------------------------------------------------------
-This database schema is not compatible with Etebase (EteSync 2.0)
-To avoid any data damage the container will now fail to start
-Please save your data follow this instructions instructions:
-https://github.com/etesync/server#updating-from-version-050-or-before
----------------------------------------------------------------------"
+    if [ "${DB_ENGINE}" = "postgres" ]; then
+      local ERROR_MESSAGE="The PostgresSQL Database is not responding *OR*\n"
+    fi
+
+    dckr_error "$(printf \"${ERROR_DB_TEMPLATE}\" \"${ERROR_MESSAGE}\")"
   fi
 }
 
 init_env
 
-check_permissions
+check_perms ${ETEBASE_EASY_CONFIG_PATH}
+
+if [ -e "${ETEBASE_EASY_CONFIG_PATH}" ]; then
+  check_perms "$(grep secret_file ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/secret_file = //g')"
+  if grep sqlite3 "${ETEBASE_EASY_CONFIG_PATH}" >/dev/null; then
+    check_perms "$(grep name ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/name = //g')" 'w'
+  fi
+fi
 
 if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] || [ ! -z "${REGEN_INI}" ]; then
   gen_inifile
@@ -227,7 +265,9 @@ fi
 
 check_db
 
-$MANAGE collectstatic --no-input
+if [ -w "$(grep static_root ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/static_root = //g')" ]; then
+  $MANAGE collectstatic --no-input
+fi
 
 if [ "${SERVER}" = 'https' ] && { [ ! -e "${X509_CRT}" ] || [ ! -e "${X509_KEY}" ]; }; then
   generate_certs
