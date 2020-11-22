@@ -5,12 +5,6 @@ on:
   push:
     tags:
       - "[0-9].[0-9].[0-9]"
-#    branches:
-#      - master
-#    paths:
-#      - "context/**"
-#      - "tags/alpine/Dockerfile"
-#      - ".github/workflows/publish-alpine.yml"
 
 jobs:
   build-push:
@@ -33,13 +27,6 @@ jobs:
           authors: 'Victor R. Santos <victor-rds@users.noreply.github.com>'
           version: ${{ steps.get_data.outputs.version }}-${{ env.FLAVOUR }}
 
-      - name: Checkout Etebase Server source
-        uses: actions/checkout@v2
-        with:
-          repository: etesync/server
-          path: server
-          ref: ${{ steps.get_data.outputs.etebase_ref }}
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1.0.1
         with:
@@ -60,9 +47,10 @@ jobs:
         uses: docker/build-push-action@v2.1.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           context: .
           file: ./tags/${{ env.FLAVOUR }}/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
-          push: true
-          tags: ${{ steps.get_data.outputs.tags }}
+          build-args: ETE_VERSION=v${{ steps.get_data.outputs.version }}
           labels: ${{ steps.get_labels.outputs.labels }}
+          tags: ${{ steps.get_data.outputs.tags }}
+          push: true
