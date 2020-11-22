@@ -1,7 +1,4 @@
 **/.git
 **/.git*
 examples/
-server/example-configs
-server/etebase-server.ini.example
-server/etesync-server.ini.example
 test/
