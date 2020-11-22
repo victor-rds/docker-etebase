@@ -1,8 +1,11 @@
+<!-- markdownlint-disable MD033 -->
 <p align="center">
   <img width="120" src="https://raw.githubusercontent.com/etesync/server/master/icon.svg" />
 </p>
+<!-- markdownlint-enable MD033 -->
 
 # Etebase Sever Docker Images
+
 ![Debian Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Images/badge.svg)
 ![Debian Slim Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Slim%20Images/badge.svg)
 ![Alpine Images](https://github.com/victor-rds/docker-etesync-server/workflows/Alpine%20Images/badge.svg)
@@ -11,15 +14,15 @@ Docker image for **[Etebase](https://www.etebase.com) Server**, also known as **
 
 ## **:bangbang: Warning** Incompatible Versions
 
-**Etesync 1.0 and Etebase (Etesync 2.0) database and server are incompatible**, given the end-to-end encryption nature and strucutural changes of this software is impossible to migrate the data withou knowing the users keys.
+**Etesync 1.0 and Etebase (Etesync 2.0) database and server are incompatible**, given the end-to-end encryption nature and structural changes of this software is impossible to migrate the data without knowing the users keys.
 
-To move the data, one you must create a new instance with a new database, while runing both servers at the same time, use the web client tool or mobile applications to migrate your data, after all users migrated the legacy server can be shutdown.
+To move the data, one you must create a new instance with a new database, while running both servers at the same time, use the web client tool or mobile applications to migrate your data, after all users migrated the legacy server can be shutdown.
 
-The new images have breaking changes, to avoid any damage, the entrypoint will check if the database is compatible before making any changes.
+The new images have breaking changes, to avoid any damage, the `entrypoint.sh` will check if the database is compatible before making any changes.
 
 ## Tags
 
-The following tags are built on latest python image and master branch of EteSync Server 
+The following tags are built on latest python image and latest version of Etebase Server
 
 - `latest` [(tags/latest/Dockerfile)](tags/base/Dockerfile)
 - `slim`  [(tags/slim/Dockerfile)](tags/slim/Dockerfile)
@@ -27,7 +30,7 @@ The following tags are built on latest python image and master branch of EteSync
 
 Release builds are available as versioned tags, for example: `X.Y.Z` or `X.Y.Z-type`
 
-Etesync 1.0 are avaible through the `legacy` tags, I will try to keep python base image up to date but no more work will be done.
+Etesync 1.0 images are available through the `legacy` tags, I will try to keep python base image up to date but no more work will be done.
 
 - `legacy` [(legacy:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/base/Dockerfile)
 - `legacy-slim`  [(legacy:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/slim/Dockerfile)
@@ -37,19 +40,56 @@ Etesync 1.0 are avaible through the `legacy` tags, I will try to keep python bas
 
 ```docker run  -d -e SUPER_USER=admin -p 80:3735 -v /path/on/host:/data victorrds/etesync```
 
-Create a container running EteSync using http protocol.
+Create a container running Etebase using http protocol.
 
 You can find more examples, using `docker-compose` [here](examples/)
 
+## Directory Structure and Data Persistence
+
+All Etebase image variants share the same folder structure:
+
+### /etebase
+
+Contains the Etebase Server source code, please avoid any changes or mounting this folder.
+
+### /data
+
+By default this is the volume where all user data and server configuration are located
+
+- `/data/etebase-server.ini` server configuration file, location can be changed using `ETEBASE_EASY_CONFIG_PATH` environment ;
+- `/data/media` the directory where user data is stored, although this location can be changed¹, it's not recommended;
+- `/data/secret.txt` file that contains the value for Django's SECRET_KEY, this location can be changed¹
+- `/data/db.sqlite3` database file, if SQLite is chosen, this location can be changed¹
+
+**¹** All the locations are set in the `etebase-server.ini` file, or on the first run startup using environment variables.
+
+### /srv/etebase
+
+Here you will find the static files needed to be shared with a reverse proxy, like _nginx_, when using `uwsgi` or `asgi` protocols, the `/entrypoint.sh` checks this files to update or recreate if not found.
+
+### Users and Permissions
+
+By default the container runs with the user and group **etebase**, both using **373** as numeric ID, if mounting any directory above to the host, instead of using docker volumes, there are two options
+
+1. The directories must have the correct permission, e.g.:
+
+    ```console
+    $ chown -vR 373:373 /host/data/path
+    changed ownership of '/host/data/path' from user:group to 373:373
+    $ docker run -v /host/data/path:/data victorrds/etebase
+    ```
+
+2. Change the user running the container:
+
+    ```console
+    $ stat -c '%u:%g' /host/data/path
+    1000:1000
+    $ docker run -u 1000:1000 -v /host/data/path:/data victorrds/etebase
+    ```
+
 ## Settings and Customization
 
-The avaible Etebase settings are set in the `/data/etebase-server.ini` file, if not found, the `/entrypoint.sh` will generate based on the **Environment Variables** explained below.
-
-## Data persistence
-
-The `/data` directory contains the settings file `etebase-server.ini` and, if the default sqlite is used, the database file `db.sqlite3`
-
-Another one that can be usefull is the `/etebase/static`, there you will find the static files needed to be shared with a reverse proxy, like _nginx_, when usgin `uwsgi` ou `asgi` protocols, the `/entrypoint.sh` checks this files to update or recreate if not found.
+The available Etebase settings are set in the `/data/etebase-server.ini` file, if not found, the `/entrypoint.sh` will generate based on the **Environment Variables** explained below.
 
 ### Environment Variables
 
@@ -58,27 +98,31 @@ Another one that can be usefull is the `/etebase/static`, there you will find th
   - `https` same as above but with TLS/SSL support, see below how to use your own certificates;
   - `http-socket` Similar to the first option, but without uWSGI HTTP router/proxy/load-balancer overhead, this recommended for any reverse-proxies/load balancers that support HTTP protocol, like _traefik_;
   - `uwsgi` binary native protocol, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
-  - `asgi` or `daphne` start using [daphne](https://github.com/django/daphne/) a HTTP, HTTP2 and WebSocket protocol server for ASGI and ASGI-HTTP, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
-  - `django-server` same as the first one, but this mode uses the embedded django http server, `./manage.py runserver :3735`, this is not recommeded but can be useful for debugging
-- **AUTO_UPATE**: Trigger database update/migration every time the container starts, default: `false `, more details below.
-- **SUPER_USER**: Username of the django superuser (only used if no previous database is found);
-  - **SUPER_PASS**: Password of the django superuser (optional, one will be generated if not set);
-  - **SUPER_EMAIL**: Email of the django superuser (optional);
+  - `asgi` or `daphne` start using [daphne](https://github.com/Django/daphne/) a HTTP, HTTP2 and WebSocket protocol server for ASGI and ASGI-HTTP, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
+  - `Django-server` same as the first one, but this mode uses the embedded Django http server, `./manage.py runserver :3735`, this is not recommended but can be useful for debugging
+- **AUTO_UPATE**: Trigger database update/migration every time the container starts, default: `false`, more details below.
+- **SUPER_USER**: Username of the Django superuser (only used if no previous database is found);
+  - **SUPER_PASS**: Password of the Django superuser (optional, one will be generated if not set);
+  - **SUPER_EMAIL**: Email of the Django superuser (optional);
 
 #### Related to the etebase-server.ini settings file
 
+- **ETEBASE_EASY_CONFIG_PATH** set the configuration file location, default: `/data/etebase-server.ini`
+- **MEDIA_ROOT**²: the path where user data is stored [:warning:](https://github.com/etesync/server#data-locations-and-backups), default: `/data/media`
 - **DB_ENGINE**: Database engine currently only accepts `sqlite` (default) and `postgres`;
-- **ALLOWED_HOSTS**: the ALLOWED_HOSTS settings, must be a valid domain or `*`. default: * (not recommended for production);
-- **SECRET_FILE**: Defines file that contains the value for django's SECRET_KEY, if not found a new one is generated. default: `/etesync/secret.txt`.
-- **LANGUAGE_CODE**: Django language code, default: en-us;
-- **TIME_ZONE**: time zone, defaults to UTC;
-- **DEBUG**: enables Django Debug mode, not recommended for production defaults to False
+- **ALLOWED_HOSTS**²: the ALLOWED_HOSTS settings, must be a valid domain or `*`. default: * (not recommended for production);
+- **SECRET_FILE**²: Defines file that contains the value for Django's SECRET_KEY, if not found a new one is generated. default: `/data/secret.txt`.
+- **LANGUAGE_CODE**: Django language code, default: `en-us`;
+- **TIME_ZONE**: time zone, defaults to `UTC`;
+- **DEBUG**²: enables Django Debug mode, not recommended for production defaults to `False`
 
-If **DB_ENGINE** is set to **sqlite**
+**²** for more details please take look at the [Etebase Server README.md](https://github.com/etesync/server#configuration)
+
+If **DB_ENGINE** is set to **`sqlite`**
 
 - **DATABASE_NAME**: database file path, defaults to `/data/db.sqlite3`
 
-If **DB_ENGINE** is set to **postgres** the following variables can be used, (only default values are listed):
+If **DB_ENGINE** is set to **`postgres`** the following variables can be used, (only default values are listed):
 
 - **DATABASE_NAME**: `etebase`;
 - **DATABASE_USER**: Follows the `DATABASE_NAME` if not set;
@@ -90,23 +134,46 @@ If **DB_ENGINE** is set to **postgres** the following variables can be used, (on
 
 As an alternative to passing sensitive information via environment variables, _FILE may be appended to some of the previously listed environment variables, causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Docker secrets stored in /run/secrets/<secret_name> files. For example:
 
-```
-$ docker run --name etebase -e DB_ENGINE=postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d victorrds/etesync
+```console
+docker run -d --name etebase \
+ -e DB_ENGINE=postgres \
+ -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd \
+ victorrds/etebase
 ```
 
 Currently, this is only supported for DB_ENGINE, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, SUPER_USER and SUPER_PASS.
 
 ## Ports
 
-This image exposes the **3735** TCP Port
+This image exposes the **3735/TCP** Port
+
+## How to Build
+
+To build the images just choose which Dockerfile and run:
+
+```console
+docker build -f tags/alpine/Dockerfile -t etebase:alpine .
+```
+
+This will create a image using Etebase master branch, to build using a release version just set the `ETE_VERSION` build argument:
+
+```console
+docker build --build-arg ETE_VERSION=v0.5.3 -f tags/base/Dockerfile -t etebase:dev .
+```
+
+## Contributing
+
+Please use the [dev branch](https://github.com/victor-rds/docker-etebase/tree/dev) code, not the master, when creating pull requests
+
+## Advanced Usage
 
 ### How to create a Superuser
 
-**Method 1 Environment Variables on first run.**
+#### Method 1 Environment Variables on first run
 
 Setting the `SUPER_` variables on the first run will trigger the creation of a superuser after the database is ready.
 
-**Method 2 Python Shell**
+#### Method 2 Python Shell
 
 At any moment after the database is ready, you can create a new superuser by running and following the prompts:
 
@@ -120,6 +187,6 @@ If `AUTO_UPATE` is not set you can update by running:
 
 ### _Using uWSGI with HTTPS_
 
-If you want to run EteSync Server HTTPS using uWSGI you need to pass certificates or the image will generate a self-signed certificate for `localhost`.
+If you want to run Etebase Server HTTPS using uWSGI you need to pass certificates or the image will generate a self-signed certificate for `localhost`.
 
-By default EteSync will look for the files `/certs/crt.pem` and `/certs/key.pem`, if for some reason you change this location change the **X509_CRT** and **X509_KEY** environment variables
+By default Etebase will look for the files `/certs/crt.pem` and `/certs/key.pem`, if for some reason you change this location change the **X509_CRT** and **X509_KEY** environment variables.
