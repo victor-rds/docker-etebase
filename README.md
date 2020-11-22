@@ -4,7 +4,7 @@
 </p>
 <!-- markdownlint-enable MD033 -->
 
-# Etebase Sever Docker Images
+# Etebase Server Docker Images
 
 ![Debian Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Images/badge.svg)
 ![Debian Slim Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Slim%20Images/badge.svg)
