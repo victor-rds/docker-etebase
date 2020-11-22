@@ -4,51 +4,57 @@ LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
 ARG PUID=373
 ARG PGID=373
+ARG ETE_VERSION=master
+ARG ETE_URL="https://github.com/etesync/server/archive/${ETE_VERSION}.tar.gz"
 
 ENV BASE_DIR /etebase
+
 ENV DATA_DIR /data
+ENV MEDIA_ROOT ${DATA_DIR}/media
+ENV ETEBASE_EASY_CONFIG_PATH ${DATA_DIR}/etebase-server.ini
+ENV SECRET_FILE ${DATA_DIR}/secret.txt
 
-ENV WEB_DIR /srv/etebase
-ENV STATIC_ROOT $WEB_DIR/static
-ENV MEDIA_ROOT $WEB_DIR/media
-
-ENV ETEBASE_EASY_CONFIG_PATH $DATA_DIR/etebase-server.ini
-ENV SECRET_FILE $DATA_DIR/secret.txt
+ENV STATIC_ROOT /srv/etebase/static
 
 ENV SERVER="http"
 ENV PORT 3735
 
-COPY --chown=${PUID}:${PGID} server /etebase
+WORKDIR ${BASE_DIR}
 
 # OS packages and deps installation
-# hadolint ignore=DL3008,DL3018
-RUN set -e && \
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi6 libpq5 libssl1.1 && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libffi-dev libpq-dev libssl-dev && \
-    pip install -r $BASE_DIR/requirements.txt uwsgi daphne 'Twisted[tls,http2]' && \
-    apt-get remove --purge -y build-essential libffi-dev libpq-dev libssl-dev && \
-    apt-get autoremove --purge -y && \
-    rm -rf /var/lib/apt/lists/*
+# hadolint ignore=DL3008,DL3018,SC2086
+RUN set -eux; \
+    apt-get update; \
+    export BUILD_DEPS='build-essential libffi-dev libpq-dev libssl-dev wget'; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi6 libpq5 libssl1.1 ${BUILD_DEPS}; \
+    wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
+    tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
+    pip install --no-cache-dir --progress-bar off -r ${BASE_DIR}/requirements.txt uwsgi daphne 'Twisted[tls,http2]'; \
+    apt-get remove --purge -y ${BUILD_DEPS}; \
+    apt-get autoremove --purge -y; \
+    rm -rf /var/lib/apt/lists/*; \
+    rm -r /tmp/etebase.tar.gz ${BASE_DIR}/example-configs ${BASE_DIR}/etebase-server.ini.example; \
+    rm -r /root/.cache; \
+    chown -R ${PUID}:${PGID} "${BASE_DIR}"
 
 # Etebase directories and user setup 
-RUN set -e && \
-    addgroup --system --gid ${PGID} etebase && \
+RUN set -eux; \
+    addgroup --system --gid ${PGID} etebase; \
     adduser --system --no-create-home --disabled-password \
-    --gecos '' --home $BASE_DIR --ingroup etebase --uid ${PUID} etebase && \
-    mkdir -p $DATA_DIR $WEB_DIR/static $WEB_DIR/media /etc/etebase-server && \
-    ln -s ${ETEBASE_EASY_CONFIG_PATH} /etc/etebase-server/etebase-server.ini && \
-    chown -R ${PUID}:${PGID} $DATA_DIR $WEB_DIR /etc/etebase-server && \
-    chmod 750 $DATA_DIR && \
-    $BASE_DIR/manage.py collectstatic --no-input && \
-    rm $BASE_DIR/secret.txt
+    --gecos '' --home ${BASE_DIR} --ingroup etebase --uid ${PUID} etebase; \
+    mkdir -p ${DATA_DIR} ${STATIC_ROOT}; \
+    chown -R ${PUID}:${PGID} ${DATA_DIR} ${STATIC_ROOT}; \
+    chmod 750 ${DATA_DIR}; \
+    export DJANGO_STATIC_ROOT=${STATIC_ROOT}; \
+    ${BASE_DIR}/manage.py collectstatic --no-input; \
+    rm ${BASE_DIR}/secret.txt
 
 COPY --chown=${PUID}:${PGID} context /
 
 USER etebase:etebase
 
-WORKDIR $BASE_DIR
+EXPOSE ${PORT}
 
-EXPOSE 3735
+VOLUME /data
 
 ENTRYPOINT ["/entrypoint.sh"]
