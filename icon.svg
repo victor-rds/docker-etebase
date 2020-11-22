@@ -1,0 +1,350 @@
+<svg width="173" height="128" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" version="1.1" xmlns="http://www.w3.org/2000/svg"><script>(function () {
+  const toBlob = HTMLCanvasElement.prototype.toBlob;
+  const toDataURL = HTMLCanvasElement.prototype.toDataURL;
+  const getImageData = CanvasRenderingContext2D.prototype.getImageData;
+  //
+  var noisify = function (canvas, context) {
+    const shift = {
+      'r': Math.floor(Math.random() * 10) - 5,
+      'g': Math.floor(Math.random() * 10) - 5,
+      'b': Math.floor(Math.random() * 10) - 5,
+      'a': Math.floor(Math.random() * 10) - 5
+    };
+    //
+    const width = canvas.width, height = canvas.height;
+    const imageData = getImageData.apply(context, [0, 0, width, height]);
+    for (let i = 0; i &lt; height; i++) {
+      for (let j = 0; j &lt; width; j++) {
+        const n = ((i * (width * 4)) + (j * 4));
+        imageData.data[n + 0] = imageData.data[n + 0] + shift.r;
+        imageData.data[n + 1] = imageData.data[n + 1] + shift.g;
+        imageData.data[n + 2] = imageData.data[n + 2] + shift.b;
+        imageData.data[n + 3] = imageData.data[n + 3] + shift.a;
+      }
+    }
+    //
+    window.top.postMessage("canvas-fingerprint-defender-alert", '*');
+    context.putImageData(imageData, 0, 0);
+  };
+  //
+  Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", {
+    "value": function () {
+      noisify(this, this.getContext("2d"));
+      return toBlob.apply(this, arguments);
+    }
+  });
+  //
+  Object.defineProperty(HTMLCanvasElement.prototype, "toDataURL", {
+    "value": function () {
+      noisify(this, this.getContext("2d"));
+      return toDataURL.apply(this, arguments);
+    }
+  });
+  //
+  Object.defineProperty(CanvasRenderingContext2D.prototype, "getImageData", {
+    "value": function () {
+      noisify(this.canvas, this);
+      return getImageData.apply(this, arguments);
+    }
+  });
+  //
+  document.documentElement.dataset.cbscriptallow = true;
+})()</script><script>{
+    const iframes = window.top.document.querySelectorAll("iframe[sandbox]");
+    for (var i = 0; i &lt; iframes.length; i++) {
+      if (iframes[i].contentWindow) {
+        if (iframes[i].contentWindow.CanvasRenderingContext2D) {
+          iframes[i].contentWindow.CanvasRenderingContext2D.prototype.getImageData = CanvasRenderingContext2D.prototype.getImageData;
+        }
+        if (iframes[i].contentWindow.HTMLCanvasElement) {
+          iframes[i].contentWindow.HTMLCanvasElement.prototype.toBlob = HTMLCanvasElement.prototype.toBlob;
+          iframes[i].contentWindow.HTMLCanvasElement.prototype.toDataURL = HTMLCanvasElement.prototype.toDataURL;
+        }
+      }
+    }
+  }</script><script>(function () {
+  var config = {
+    "random": {
+      "value": function () {return Math.random()},
+      "item": function (e) {
+        var rand = e.length * config.random.value();
+        return e[Math.floor(rand)];
+      },
+      "array": function (e) {
+        var rand = config.random.item(e);
+        return new Int32Array([rand, rand]);
+      },
+      "items": function (e, n) {
+        var length = e.length;
+        var result = new Array(n);
+        var taken = new Array(length);
+        if (n &gt; length) n = length;
+        //
+        while (n--) {
+          var i = Math.floor(config.random.value() * length);
+          result[n] = e[i in taken ? taken[i] : i];
+          taken[i] = --length in taken ? taken[length] : length;
+        }
+        //
+        return result;
+      }
+    },
+    "spoof": {
+      "webgl": {
+        "buffer": function (target) {
+          const bufferData = target.prototype.bufferData;
+          Object.defineProperty(target.prototype, "bufferData", {
+            "value": function () {
+              var index = Math.floor(config.random.value() * 10);
+              var noise = 0.1 * config.random.value() * arguments[1][index];
+              arguments[1][index] = arguments[1][index] + noise;
+              window.top.postMessage("webgl-fingerprint-defender-alert", '*');
+              //
+              return bufferData.apply(this, arguments);
+            }
+          });
+        },
+        "parameter": function (target) {
+          const getParameter = target.prototype.getParameter;
+          Object.defineProperty(target.prototype, "getParameter", {
+            "value": function () {
+              var float32array = new Float32Array([1, 8192]);
+              window.top.postMessage("webgl-fingerprint-defender-alert", '*');
+              //
+              if (arguments[0] === 3415) return 0;
+              else if (arguments[0] === 3414) return 24;
+              else if (arguments[0] === 35661) return config.random.items([128, 192, 256]);
+              else if (arguments[0] === 3386) return config.random.array([8192, 16384, 32768]);
+              else if (arguments[0] === 36349 || arguments[0] === 36347) return config.random.item([4096, 8192]);
+              else if (arguments[0] === 34047 || arguments[0] === 34921) return config.random.items([2, 4, 8, 16]);
+              else if (arguments[0] === 7937 || arguments[0] === 33901 || arguments[0] === 33902) return float32array;
+              else if (arguments[0] === 34930 || arguments[0] === 36348 || arguments[0] === 35660) return config.random.item([16, 32, 64]);
+              else if (arguments[0] === 34076 || arguments[0] === 34024 || arguments[0] === 3379) return config.random.item([16384, 32768]);
+              else if (arguments[0] === 3413 || arguments[0] === 3412 || arguments[0] === 3411 || arguments[0] === 3410 || arguments[0] === 34852) return config.random.item([2, 4, 8, 16]);
+              else return config.random.item([0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]);
+              //
+              return getParameter.apply(this, arguments);
+            }
+          });
+        }
+      }
+    }
+  };
+  //
+  config.spoof.webgl.buffer(WebGLRenderingContext);
+  config.spoof.webgl.buffer(WebGL2RenderingContext);
+  config.spoof.webgl.parameter(WebGLRenderingContext);
+  config.spoof.webgl.parameter(WebGL2RenderingContext);
+  //
+  document.documentElement.dataset.wgscriptallow = true;
+})()</script><script>{
+    const iframes = window.top.document.querySelectorAll("iframe[sandbox]");
+    for (var i = 0; i &lt; iframes.length; i++) {
+      if (iframes[i].contentWindow) {
+        if (iframes[i].contentWindow.WebGLRenderingContext) {
+          iframes[i].contentWindow.WebGLRenderingContext.prototype.bufferData = WebGLRenderingContext.prototype.bufferData;
+          iframes[i].contentWindow.WebGLRenderingContext.prototype.getParameter = WebGLRenderingContext.prototype.getParameter;
+        }
+        if (iframes[i].contentWindow.WebGL2RenderingContext) {
+          iframes[i].contentWindow.WebGL2RenderingContext.prototype.bufferData = WebGL2RenderingContext.prototype.bufferData;
+          iframes[i].contentWindow.WebGL2RenderingContext.prototype.getParameter = WebGL2RenderingContext.prototype.getParameter;
+        }
+      }
+    }
+  }</script><script>(function () {
+  const context = {
+    "BUFFER": null,
+    "getChannelData": function (e) {
+      const getChannelData = e.prototype.getChannelData;
+      Object.defineProperty(e.prototype, "getChannelData", {
+        "value": function () {
+          const results_1 = getChannelData.apply(this, arguments);
+          if (context.BUFFER !== results_1) {
+            context.BUFFER = results_1;
+            window.top.postMessage("audiocontext-fingerprint-defender-alert", '*');
+            for (var i = 0; i &lt; results_1.length; i += 100) {
+              let index = Math.floor(Math.random() * i);
+              results_1[index] = results_1[index] + Math.random() * 0.0000001;
+            }
+          }
+          //
+          return results_1;
+        }
+      });
+    },
+    "createAnalyser": function (e) {
+      const createAnalyser = e.prototype.__proto__.createAnalyser;
+      Object.defineProperty(e.prototype.__proto__, "createAnalyser", {
+        "value": function () {
+          const results_2 = createAnalyser.apply(this, arguments);
+          const getFloatFrequencyData = results_2.__proto__.getFloatFrequencyData;
+          Object.defineProperty(results_2.__proto__, "getFloatFrequencyData", {
+            "value": function () {
+              window.top.postMessage("audiocontext-fingerprint-defender-alert", '*');
+              const results_3 = getFloatFrequencyData.apply(this, arguments);
+              for (var i = 0; i &lt; arguments[0].length; i += 100) {
+                let index = Math.floor(Math.random() * i);
+                arguments[0][index] = arguments[0][index] + Math.random() * 0.1;
+              }
+              //
+              return results_3;
+            }
+          });
+          //
+          return results_2;
+        }
+      });
+    }
+  };
+  //
+  context.getChannelData(AudioBuffer);
+  context.createAnalyser(AudioContext);
+  context.getChannelData(OfflineAudioContext);
+  context.createAnalyser(OfflineAudioContext);
+  document.documentElement.dataset.acxscriptallow = true;
+})()</script><script>{
+    const iframes = window.top.document.querySelectorAll("iframe[sandbox]");
+    for (var i = 0; i &lt; iframes.length; i++) {
+      if (iframes[i].contentWindow) {
+        if (iframes[i].contentWindow.AudioBuffer) {
+          if (iframes[i].contentWindow.AudioBuffer.prototype) {
+            if (iframes[i].contentWindow.AudioBuffer.prototype.getChannelData) {
+              iframes[i].contentWindow.AudioBuffer.prototype.getChannelData = AudioBuffer.prototype.getChannelData;
+            }
+          }
+        }
+
+        if (iframes[i].contentWindow.AudioContext) {
+          if (iframes[i].contentWindow.AudioContext.prototype) {
+            if (iframes[i].contentWindow.AudioContext.prototype.__proto__) {
+              if (iframes[i].contentWindow.AudioContext.prototype.__proto__.createAnalyser) {
+                iframes[i].contentWindow.AudioContext.prototype.__proto__.createAnalyser = AudioContext.prototype.__proto__.createAnalyser;
+              }
+            }
+          }
+        }
+
+        if (iframes[i].contentWindow.OfflineAudioContext) {
+          if (iframes[i].contentWindow.OfflineAudioContext.prototype) {
+            if (iframes[i].contentWindow.OfflineAudioContext.prototype.__proto__) {
+              if (iframes[i].contentWindow.OfflineAudioContext.prototype.__proto__.createAnalyser) {
+                iframes[i].contentWindow.OfflineAudioContext.prototype.__proto__.createAnalyser = OfflineAudioContext.prototype.__proto__.createAnalyser;
+              }
+            }
+          }
+        }
+
+        if (iframes[i].contentWindow.OfflineAudioContext) {
+          if (iframes[i].contentWindow.OfflineAudioContext.prototype) {
+            if (iframes[i].contentWindow.OfflineAudioContext.prototype.__proto__) {
+              if (iframes[i].contentWindow.OfflineAudioContext.prototype.__proto__.getChannelData) {
+                iframes[i].contentWindow.OfflineAudioContext.prototype.__proto__.getChannelData = OfflineAudioContext.prototype.__proto__.getChannelData;
+              }
+            }
+          }
+        }
+      }
+    }
+  }</script><script>(function () {
+  var rand = {
+    "noise": function () {
+      var SIGN = Math.random() &lt; Math.random() ? -1 : 1;
+      return Math.floor(Math.random() + SIGN * Math.random());
+    },
+    "sign": function () {
+      const tmp = [-1, -1, -1, -1, -1, -1, +1, -1, -1, -1];
+      const index = Math.floor(Math.random() * tmp.length);
+      return tmp[index];
+    }
+  };
+  //
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    get () {
+      const height = Math.floor(this.getBoundingClientRect().height);
+      const valid = height &amp;&amp; rand.sign() === 1;
+      const result = valid ? height + rand.noise() : height;
+      //
+      if (valid &amp;&amp; result !== height) {
+        window.top.postMessage("font-fingerprint-defender-alert", '*');
+      }
+      //
+      return result;
+    }
+  });
+  //
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    get () {
+      const width = Math.floor(this.getBoundingClientRect().width);
+      const valid = width &amp;&amp; rand.sign() === 1;
+      const result = valid ? width + rand.noise() : width;
+      //
+      if (valid &amp;&amp; result !== width) {
+        window.top.postMessage("font-fingerprint-defender-alert", '*');
+      }
+      //
+      return result;
+    }
+  });
+  //
+  document.documentElement.dataset.fbscriptallow = true;
+})()</script><script>{
+    const iframes = window.top.document.querySelectorAll("iframe[sandbox]");
+    for (var i = 0; i &lt; iframes.length; i++) {
+      if (iframes[i].contentWindow) {
+        if (iframes[i].contentWindow.HTMLElement) {
+          iframes[i].contentWindow.HTMLElement.prototype.offsetWidth = HTMLElement.prototype.offsetWidth;
+          iframes[i].contentWindow.HTMLElement.prototype.offsetHeight = HTMLElement.prototype.offsetHeight;
+        }
+      }
+    }
+  }</script><metadata><rdf:RDF><cc:Work rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/><dc:title/></cc:Work></rdf:RDF></metadata><defs><clipPath id="a"><path d="m76 2v46h-22v23h-18.419c-0.07818 0.66569-0.14148 1.3329-0.20574 2-1.1512 12.531 1.0364 24.088 6.0625 33.969l1.6875 3.0312c1.0114 1.8168 2.1912 3.523 3.4375 5.1875 1.2447 1.6625 1.6857 2.5826 2.4688 3.6875 13.289 14.936 33.098 22.125 55.969 22.125 50.648 0 93.633-22.438 112.66-72.844 13.497 1.385 26.443-2.0759 32.344-13.594-9.3986-5.4237-21.478-3.6853-28.438-0.1875l18.438-52.375-72 46h-23v-46z"/></clipPath><filter id="b" color-interpolation-filters="sRGB"><feFlood flood-color="rgb(0,0,0)" flood-opacity=".49804" result="flood"/><feComposite in="flood" in2="SourceGraphic" operator="in" result="composite1"/><feGaussianBlur in="composite1" result="blur" stdDeviation="4"/><feOffset dx="0" dy="4" result="offset"/><feComposite in="SourceGraphic" in2="offset" result="composite2"/></filter><filter id="c" color-interpolation-filters="sRGB"><feFlood flood-color="rgb(0,0,0)" flood-opacity=".49804" result="flood"/><feComposite in="flood" in2="SourceGraphic" operator="in" result="composite1"/><feGaussianBlur in="composite1" result="blur" stdDeviation="4"/><feOffset dx="0" dy="4" result="offset"/><feComposite in="SourceGraphic" in2="offset" result="composite2"/></filter></defs><script>try {
+                        Object.defineProperty(screen, "availTop", { value: 0 });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(screen, "availLeft", { value: 0 });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(screen, "availWidth", { value: 1718 });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(screen, "availHeight", { value: 1335 });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(screen, "colorDepth", { value: 24 });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(screen, "pixelDepth", { value: 24 });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(navigator, "hardwareConcurrency", { value: 8 });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(navigator, "appVersion", { value: "5.0 (Windows)" });
+                    } catch (e) {}
+                    try {
+                        Object.defineProperty(navigator, "doNotTrack", { value: "unspecified" });
+                    } catch (e) {}
+                    
+            try {
+                window.screenY = 0
+            } catch (e) { }
+        
+            try {
+                window.screenTop = 0
+            } catch (e) { }
+        
+            try {
+                window.top.window.outerHeight = window.screen.height
+            } catch (e) { }
+        
+            try {
+                window.screenX = 0
+            } catch (e) { }
+        
+            try {
+                window.screenLeft = 0
+            } catch (e) { }
+        
+            try {
+                window.top.window.outerWidth = window.screen.width
+            } catch (e) { }</script><script/><g transform="translate(-.94146 -33.977)"><g transform="matrix(.676 0 0 .676 .94146 33.977)"><g transform="matrix(.83141 0 0 .8298 -203.01 36.243)"><path d="m287.41-31.833h192v192h-192z" fill="none" stroke-width="8"/><path transform="matrix(1.0041 0 0 .99663 236.34 -128.1)" d="m210.91 166.8v-37.52h-37.52l-26.48-26.48-26.48 26.48h-37.52v37.52l-26.48 26.48 26.48 26.48v37.52h37.52l26.48 26.48 26.48-26.48h37.52v-37.52l26.48-26.48z" fill="#ffc107" filter="url(#c)" stroke-width="8"/><g transform="matrix(1.4309 0 0 1.3318 182.46 -60.328)"><path d="m73.384 21.914h134.74v143.68h-134.74z" fill="none" stroke-width="5.7972"/><ellipse cx="140.78" cy="93.719" rx="11.3" ry="12.05" fill="#ffd740" stroke="#ffd740" stroke-linecap="round" stroke-linejoin="round" stroke-width="44.182"/><path transform="matrix(.71931 0 0 .73752 35.063 302.34)" d="m146.91-329.25v-17.45l-23.295 23.266 23.295 23.266v-17.45c19.276 0 34.942 15.647 34.942 34.9 0 5.8748-1.4559 11.459-4.0766 16.287l8.5026 8.4923c4.5425-7.1544 7.2214-15.647 7.2214-24.779 0-25.709-20.849-46.533-46.59-46.533zm0 81.433c-19.277 0-34.942-15.647-34.942-34.9 0-5.8748 1.4559-11.459 4.0766-16.287l-8.5026-8.4923c-4.5425 7.1544-7.2214 15.647-7.2214 24.779 0 25.709 20.849 46.533 46.59 46.533v17.45l23.295-23.266-23.295-23.266z" fill="#448aff" filter="url(#b)" stroke-width="5.8202"/><path d="m73.384 21.914h134.74v143.68h-134.74z" fill="none" stroke-width="5.7972"/></g></g><g><path d="m181.92 113.64c5.339 0 10.831-0.95117 15.887-2.6644 2.4845-0.84244 5.2732-2.0148 7.7239-3.4892-3.2278-4.2144-4.8758-9.5357-5.361-14.781-0.65874-7.1343 0.78032-16.42 5.609-22.004l2.4036-2.7801 2.8642 2.3024c7.2114 5.7937 13.276 13.889 14.345 23.118 8.6831-2.5541 18.878-1.95 26.531 2.4674l3.14 1.8118-1.6528 3.2257c-6.4729 12.633-20.005 16.547-33.235 15.854-19.797 49.308-62.898 72.653-115.16 72.653-26.999 0-51.77-10.093-65.876-34.047-0.82702-1.488-1.5352-3.0439-2.2863-4.5721-4.7681-10.544-6.3518-22.095-5.2775-33.637l0.32241-3.4571" fill="#394d54"/><path transform="translate(0 44.529)" d="m221.57 54.38c1.5333-11.915-7.3838-21.275-12.914-25.718-6.3727 7.3678-7.363 26.678 2.635 34.807-5.5795 4.9561-17.337 9.4484-29.376 9.4484h-147.92c-1.1707 12.567 0 73.083 0 73.083h217l-0.98657-91.424c-9.3986-5.4237-21.484-3.6943-28.443-0.19655" clip-path="url(#a)" fill="#17b5eb"/><path transform="translate(0 44.529)" d="m34 89v57h217v-57" clip-path="url(#a)" fill-opacity=".17"/><path transform="translate(0 44.529)" d="m111.24 140.89c-13.54-6.4252-20.972-15.159-25.107-24.694l-41.131 1.8044 21 28 45.237-5.11" clip-path="url(#a)" fill="#d4edf1"/><path transform="translate(0 44.529)" d="m222.5 53.938v0.03125c-20.861 26.889-50.783 50.379-82.906 62.719-28.655 11.008-53.638 11.06-70.875 2.2188-1.8561-1.0483-3.6757-2.2115-5.5-3.3125-12.637-8.832-19.754-23.441-19.156-42.688h-10.062v73.094h217v-96h-25z" clip-path="url(#a)" fill-opacity=".085"/><path d="m45.625 161.56c14.165 0.77531 29.282 0.91433 42.469-3.2188" fill="none" stroke="#394d54" stroke-linecap="round" stroke-width="3.4"/><path d="m102.17 151.49c0 3.019-2.4475 5.4665-5.4665 5.4665-3.0195 0-5.4676-2.4475-5.4676-5.4665 0-3.019 2.4481-5.4676 5.4676-5.4676 3.019 0 5.4665 2.4486 5.4665 5.4676z" fill="#d4edf1"/><path d="m98.121 147.84c-0.47719 0.27582-0.80013 0.79264-0.80013 1.3839 0 0.88261 0.71551 1.5971 1.5981 1.5971 0.60465 0 1.13-0.3358 1.4016-0.83174 0.19173 0.4622 0.29831 0.96991 0.29831 1.5023 0 2.1621-1.7529 3.915-3.9155 3.915-2.1621 0-3.916-1.7529-3.916-3.915 0-2.1631 1.754-3.9166 3.916-3.9166 0.50022 0 0.97741 0.0943 1.4176 0.2651z" fill="#394d54"/><path d="m0 134.69h254.33c-5.5377-1.4048-17.521-3.3023-15.545-10.56-10.069 11.652-34.353 8.1743-40.481 2.4288-6.8247 9.8983-46.555 6.136-49.326-1.5751-8.5556 10.041-35.067 10.041-43.623 0-2.7721 7.7111-42.501 11.473-49.327 1.5751-6.1285 5.7455-30.41 9.223-40.48-2.4288 1.9762 7.2574-10.007 9.155-15.546 10.56" fill="#394d54"/></g></g></g></svg>

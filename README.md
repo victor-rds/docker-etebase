@@ -1,10 +1,4 @@
-<!-- markdownlint-disable MD033 -->
-<p align="center">
-  <img width="120" src="https://raw.githubusercontent.com/etesync/server/master/icon.svg" />
-</p>
-<!-- markdownlint-enable MD033 -->
-
-# Etebase Server Docker Images
+# ![docker-etebase](icon.svg) Etebase Server Docker Images
 
 ![Debian Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Images/badge.svg)
 ![Debian Slim Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Slim%20Images/badge.svg)
