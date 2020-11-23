@@ -45,11 +45,6 @@ dckr_error() {
   exit 1
 }
 
-root_fix_perm() {
-  chown ${PGID}:${GID} "${1}"
-  chmod u=rwX,g=rX,o-rwx "${1}"
-}
-
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
@@ -77,8 +72,8 @@ init_env() {
     declare -g -x PUID=${C_UID}
     declare -g -x PGID=${C_GID}
   else
-    declare -g -x PUID=${PUID:-373}
-    declare -g -x PGID=${PGID:-373}
+    declare -g -x PUID=${PUID:=373}
+    declare -g -x PGID=${PGID:=373}
     dckr_warn "Running container as Root is not recommended, please avoid if possible."
 
     if [[ "${cms}" == @(asgi|daphne|django-server) ]]; then
@@ -120,6 +115,11 @@ init_env() {
   fi
 }
 
+root_fix_perm() {
+  chown ${PUID}:${PGID} "${1}"
+  chmod u=rwX,g=rX,o-rwx "${1}"
+}
+
 check_perms() {
   local FILE_PATH="${1}"
   local DIR_PATH="$(dirname ${1})"
@@ -133,15 +133,16 @@ check_perms() {
     elif [ -e "${FILE_PATH}" ] && [ ! -r "${FILE_PATH}" ]; then
       dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" 'Cannot read the file')"
     else
-      dckr_note "File permissions: Ok"
+      dckr_note "[ ${FILE_PATH} ] permissions: Ok"
     fi
   else
     if [ -e "${FILE_PATH}" ]; then
       root_fix_perm "${FILE_PATH}"
     else
       root_fix_perm "${DIR_PATH}"
+      chmod g+s "${DIR_PATH}"
     fi
-    dckr_note "File permissions: Ok"
+    dckr_note "[ ${FILE_PATH} ] permissions: Ok"
   fi
 }
 
@@ -254,7 +255,7 @@ check_perms ${ETEBASE_EASY_CONFIG_PATH}
 
 if [ -e "${ETEBASE_EASY_CONFIG_PATH}" ]; then
   check_perms "$(grep secret_file ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/secret_file = //g')"
-  check_perms "$(grep secret_file ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/media_root = //g')"
+  check_perms "$(grep media_root ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/media_root = //g')" 'w'
   if grep sqlite3 "${ETEBASE_EASY_CONFIG_PATH}" >/dev/null; then
     check_perms "$(grep name ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/name = //g')" 'w'
   fi
