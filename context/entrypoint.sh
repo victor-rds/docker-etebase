@@ -239,7 +239,7 @@ check_db() {
     migrate true
     create_superuser
   elif [ ${_PS[0]} -eq "0" ] && [ ${_PS[1]} -ne "0" ]; then
-    migrate "${AUTO_UPATE}"
+    migrate "${AUTO_UPDATE}"
   else
     if [ "${DB_ENGINE}" = "postgres" ]; then
       local ERROR_MESSAGE="The PostgresSQL Database is not responding *OR*\n"
