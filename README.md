@@ -94,7 +94,7 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
   - `uwsgi` binary native protocol, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
   - `asgi` or `daphne` start using [daphne](https://github.com/Django/daphne/) a HTTP, HTTP2 and WebSocket protocol server for ASGI and ASGI-HTTP, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
   - `Django-server` same as the first one, but this mode uses the embedded Django http server, `./manage.py runserver :3735`, this is not recommended but can be useful for debugging
-- **AUTO_UPATE**: Trigger database update/migration every time the container starts, default: `false`, more details below.
+- **AUTO_UPDATE**: Trigger database update/migration every time the container starts, default: `false`, more details below.
 - **SUPER_USER**: Username of the Django superuser (only used if no previous database is found);
   - **SUPER_PASS**: Password of the Django superuser (optional, one will be generated if not set);
   - **SUPER_EMAIL**: Email of the Django superuser (optional);
@@ -175,7 +175,7 @@ At any moment after the database is ready, you can create a new superuser by run
 
 ### Upgrade application and database
 
-If `AUTO_UPATE` is not set you can update by running:
+If `AUTO_UPDATE` is not set you can update by running:
 
 ```docker exec -it {container_name} python manage.py migrate```
 
