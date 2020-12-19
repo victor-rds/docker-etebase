@@ -2,13 +2,15 @@ version: '3'
 
 volumes:
   etebase_static:
+  etebase_data:
   postgres_data:
 
 services:
   etebase:
-    image: victorrds/etesync:alpine
+    image: victorrds/etebase:dev
     container_name: "etebase"
     volumes:
+      - etebase_data:/data:rw
       - etebase_static:${STATIC_PATH}:rw
     environment:
       SERVER: asgi
@@ -45,5 +47,3 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
     restart: always
-
-  

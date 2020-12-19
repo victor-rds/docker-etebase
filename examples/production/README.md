@@ -9,7 +9,9 @@ There 3 sevices in this example:
 * Nginx Web Server
 
 ## Warning
-As an example, this should not be used in real production without changes, this script will initialize a PostgreSQL DB with unsafe options, all the data is saved on docker volumes created by the compose file, be aware this is may not work in your particular setup.
+As an example, this should not be used in real production without changes, this script will initialize a PostgreSQL DB with unsafe options, do not use the default passwords and avoid leaving them as environment variables after the initial setups, if possible, use secrets.
+
+All the etebase data and postgres data are saved on docker volumes created by the compose file, be careful when using this way, it's better to create named volumes externally and linking them to the compose stack, this lowers the chance of accidentally deleting them, also be aware this is may not work in your particular setup or backup strategy.
 
 ## Usage
 The `.env` file contains the variables used on `docker-compose.yml`, you can edit if you want, then run:
