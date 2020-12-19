@@ -38,9 +38,9 @@ RUN set -eux; \
     addgroup --system --gid ${PGID} etebase; \
     adduser --system --no-create-home --disabled-password \
     --gecos '' --home ${BASE_DIR} --ingroup etebase --uid ${PUID} etebase; \
-    mkdir -p ${DATA_DIR} ${STATIC_ROOT}; \
+    mkdir -p ${MEDIA_ROOT} ${STATIC_ROOT}; \
     chown -R ${PUID}:${PGID} ${DATA_DIR} ${STATIC_ROOT}; \
-    chmod 750 ${DATA_DIR}; \
+    chmod -R 750 ${DATA_DIR}; \
     export DJANGO_STATIC_ROOT=${STATIC_ROOT}; \
     ${BASE_DIR}/manage.py collectstatic --no-input; \
     rm ${BASE_DIR}/secret.txt
