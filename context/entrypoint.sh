@@ -45,6 +45,10 @@ dckr_error() {
   exit 1
 }
 
+get_file_info () {
+  stat -c '%n | %u:%g %A' "$1"
+}
+
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
@@ -127,13 +131,13 @@ check_perms() {
 
   if [ "${C_UID}" -ne '0' ]; then
     if [ ! -e "${FILE_PATH}" ] && [ ! -w "${DIR_PATH}" ]; then
-      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${DIR_PATH}" "Cannot create ${FILE_PATH} file")"
+      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${DIR_PATH}" "Cannot write on $(get_file_info "${DIR_PATH}")" )"
     elif [ -e "${FILE_PATH}" ] && [ "${PERM_TYPE}" = 'w' ] && [ ! -w "${FILE_PATH}" ]; then
-      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" 'Cannot write on file')"
+      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" "Cannot write on file $(get_file_info "${FILE_PATH}")")"
     elif [ -e "${FILE_PATH}" ] && [ ! -r "${FILE_PATH}" ]; then
-      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" 'Cannot read the file')"
+      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" "Cannot read the file $(get_file_info "${FILE_PATH}")")"
     else
-      dckr_note "[ ${FILE_PATH} ] permissions: Ok"
+      dckr_note "[ $(get_file_info "${FILE_PATH}") ] permissions: Ok"
     fi
   else
     if [ -e "${FILE_PATH}" ]; then
@@ -142,7 +146,7 @@ check_perms() {
       root_fix_perm "${DIR_PATH}"
       chmod g+s "${DIR_PATH}"
     fi
-    dckr_note "[ ${FILE_PATH} ] permissions: Ok"
+    dckr_note "[ $(get_file_info "${FILE_PATH}") ] permissions: Ok"
   fi
 }
 
