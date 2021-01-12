@@ -94,6 +94,7 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
   - `uwsgi` binary native protocol, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
   - `asgi` or `daphne` start using [daphne](https://github.com/Django/daphne/) a HTTP, HTTP2 and WebSocket protocol server for ASGI and ASGI-HTTP, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
   - `Django-server` same as the first one, but this mode uses the embedded Django http server, `./manage.py runserver :3735`, this is not recommended but can be useful for debugging
+- **DEBUG**: Runs the `/entrypoint.sh` with `set -x` for debug purposes, this variable does not change **DEBUG_DJANGO** described below.
 - **AUTO_UPDATE**: Trigger database update/migration every time the container starts, default: `false`, more details below.
 - **SUPER_USER**: Username of the Django superuser (only used if no previous database is found);
   - **SUPER_PASS**: Password of the Django superuser (optional, one will be generated if not set);
@@ -108,7 +109,7 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
 - **SECRET_FILE**²: Defines file that contains the value for Django's SECRET_KEY, if not found a new one is generated. default: `/data/secret.txt`.
 - **LANGUAGE_CODE**: Django language code, default: `en-us`;
 - **TIME_ZONE**: time zone, defaults to `UTC`;
-- **DEBUG**²: enables Django Debug mode, not recommended for production defaults to `False`
+- **DEBUG_DJANGO**²: enables Django Debug mode, not recommended for production defaults to `false`
 
 **²** for more details please take look at the [Etebase Server README.md](https://github.com/etesync/server#configuration)
 

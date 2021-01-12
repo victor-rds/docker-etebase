@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [ "${DEBUG}" = "true" ]; then
+  set -x
+fi
+
 if [ ! -z "$@" ]; then
   exec "$@"
 fi
@@ -89,7 +93,7 @@ init_env() {
     dckr_error "PUID or GUID values not supported!"
   fi
 
-  : ${DEBUG:=false}
+  : ${DEBUG_DJANGO:=false}
   : ${LANGUAGE_CODE:=en-us}
   : ${TIME_ZONE:=UTC}
   : ${ALLOWED_HOSTS:=*}
@@ -154,7 +158,7 @@ gen_inifile() {
 
   echo "[global]
 secret_file = ${SECRET_FILE}
-debug = ${DEBUG}
+debug = ${DEBUG_DJANGO}
 static_root = ${STATIC_ROOT}
 static_url = /static/
 media_root = ${MEDIA_ROOT}
@@ -306,5 +310,9 @@ case "${SERVER}" in
   dckr_error "Server option not supported!"
   ;;
 esac
+
+if [ "${DEBUG}" = "true" ]; then
+  set +x
+fi
 
 exec $_CMD
