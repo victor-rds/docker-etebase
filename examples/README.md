@@ -4,4 +4,4 @@ Here you can find some examples using `docker-compose` files to deploy your serv
 
 * **[Production Setup](production/)** (Etebase + Postgres + Nginx) 
 * **[Traefik Setup](traefik/)** (Etebase + Traefik)
-* **[Standalone Setup](Standalone/)**
+* **[Standalone Setup](standalone/)**
