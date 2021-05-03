@@ -1,4 +1,4 @@
-FROM python:3.9.0-alpine
+FROM python:3.9.4-alpine
 LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
 ARG PUID=373
