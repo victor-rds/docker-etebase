@@ -24,7 +24,7 @@ WORKDIR ${BASE_DIR}
 # hadolint ignore=DL3008,DL3018
 RUN set -eux; \
     apk add --no-cache openssl libressl mailcap libpq libffi bash; \
-    apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev libressl-dev postgresql-dev wget; \
+    apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev libressl-dev postgresql-dev wget cargo; \
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --upgrade pip; \
