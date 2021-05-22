@@ -7,7 +7,7 @@ volumes:
 
 services:
   etebase:
-    image: victorrds/etebase:dev
+    image: victorrds/etebase:latest
     container_name: "etebase"
     volumes:
       - etebase_data:/data:rw
