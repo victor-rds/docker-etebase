@@ -29,13 +29,12 @@ RUN set -eux; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi6 libpq5 libssl1.1 ${BUILD_DEPS}; \
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
-    /usr/local/bin/python -m pip install --upgrade pip; \
+    /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r ${BASE_DIR}/requirements.txt uwsgi daphne 'Twisted[tls,http2]'; \
     apt-get remove --purge -y ${BUILD_DEPS}; \
     apt-get autoremove --purge -y; \
     rm -rf /var/lib/apt/lists/*; \
     rm -r /tmp/etebase.tar.gz ${BASE_DIR}/example-configs ${BASE_DIR}/etebase-server.ini.example; \
-    rm -r /root/.cache; \
     chown -R ${PUID}:${PGID} "${BASE_DIR}"
 
 # Etebase directories and user setup 
