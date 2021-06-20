@@ -11,6 +11,7 @@ services:
       traefik.http.routers.etebase.entrypoints: "websecure"
       traefik.http.routers.etebase.service: "etebase"
       traefik.http.routers.etebase.tls: "true"
+      #traefik.http.routers.etebase.tls.certresolver: "http-01"
 
   traefik:
     command:
@@ -23,7 +24,6 @@ services:
       #- "--entrypoints.websecure.http.tls.certResolver=http-01"
       #- "--certificatesresolvers.http-01.acme.httpchallenge=true"
       #- "--certificatesresolvers.http-01.acme.httpchallenge.entrypoint=web"
-      #- "--certificatesresolvers.http-01.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       #- "--certificatesresolvers.http-01.acme.email=postmaster@mydomain.com"
       #- "--certificatesresolvers.http-01.acme.storage=/letsencrypt/acme.json"
     ports:
