@@ -1,4 +1,4 @@
-FROM python:3.9.5-buster
+FROM python:3.9.6-buster
 
 LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
