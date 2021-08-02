@@ -7,7 +7,7 @@ on:
       - "[0-9].[0-9].[0-9]"
 
 jobs:
-  build-push:
+  build-push-base:
     runs-on: ubuntu-latest
     env:
       FLAVOUR: base

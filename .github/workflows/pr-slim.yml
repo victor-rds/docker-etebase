@@ -12,7 +12,7 @@ on:
       - ".github/workflows/pr_slim.yml"
 
 jobs:
-  pr-build:
+  pr-build-slim:
     runs-on: ubuntu-latest
     env:
       FLAVOUR: slim

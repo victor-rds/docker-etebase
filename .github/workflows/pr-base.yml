@@ -12,7 +12,7 @@ on:
       - ".github/workflows/pr_base.yml"
 
 jobs:
-  pr-build:
+  pr-build-base:
     runs-on: ubuntu-latest
     env:
       FLAVOUR: base

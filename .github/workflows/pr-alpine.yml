@@ -12,7 +12,7 @@ on:
       - ".github/workflows/pr_alpine.yml"
 
 jobs:
-  pr-build:
+  pr-build-alpine:
     runs-on: ubuntu-latest
     env:
       FLAVOUR: alpine
