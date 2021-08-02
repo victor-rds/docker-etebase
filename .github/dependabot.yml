@@ -6,7 +6,7 @@ updates:
       interval: weekly
       time: "06:00"
     open-pull-requests-limit: 5
-    target-branch: master
+    target-branch: dev
 
   - package-ecosystem: docker
     directory: "/tags/slim"
@@ -14,7 +14,7 @@ updates:
       interval: weekly
       time: "06:00"
     open-pull-requests-limit: 5
-    target-branch: master
+    target-branch: dev
 
   - package-ecosystem: docker
     directory: "/tags/alpine"
@@ -22,7 +22,7 @@ updates:
       interval: weekly
       time: "06:00"
     open-pull-requests-limit: 5
-    target-branch: master
+    target-branch: dev
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -30,3 +30,4 @@ updates:
       # Check for updates to GitHub Actions every weekday
       interval: weekly
       time: "06:00"
+    target-branch: dev
