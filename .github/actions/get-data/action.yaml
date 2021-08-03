@@ -21,7 +21,8 @@ runs:
         ETEBASE_IMG: victorrds/etebase
       shell: bash
       run: |
-        VERSION="nightly"
+        VERSION="master"
+        ETE_VERSION="master"
         _SUFFIX=""
         TAGS=""
 
@@ -35,7 +36,9 @@ runs:
         if [[ $GITHUB_REF == refs/tags/* ]]; then
           VERSION=${GITHUB_REF#refs/tags/}
           TAGS="${TAGS},${ETESYNC_IMG}:${VERSION}${_SUFFIX},${ETEBASE_IMG}:${VERSION}${_SUFFIX}"
+          ETE_VERSION="v{VERSION}"
         fi
 
         echo ::set-output name=version::${VERSION}
+        echo ::set-output name=ete_version::${ETE_VERSION}
         echo ::set-output name=tags::${TAGS}

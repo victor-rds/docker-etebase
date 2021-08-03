@@ -48,7 +48,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           context: .
           file: ./tags/${{ env.FLAVOUR }}/Dockerfile
-          build-args: ETE_VERSION=v${{ steps.get_data.outputs.version }}
+          build-args: ETE_VERSION=${{ steps.get_data.outputs.ete_version }}
           labels: ${{ steps.get_labels.outputs.labels }}
           tags: ${{ steps.get_data.outputs.tags }}
           push: true
