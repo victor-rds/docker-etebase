@@ -1,2 +1,6 @@
 test
 examples/production/certs/*
+.actrc
+.env
+.event.json
+.secrets

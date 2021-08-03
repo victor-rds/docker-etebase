@@ -1,4 +1,7 @@
 **/.git
 **/.git*
 examples/
-test/
+.actrc
+.env
+.event.json
+.secrets
