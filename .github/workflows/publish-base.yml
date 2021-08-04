@@ -10,20 +10,27 @@ jobs:
   build-push-base:
     runs-on: ubuntu-latest
     env:
-      FLAVOUR: base
+      BASEIMG: base
     steps:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v2
 
-      - id: get_data
-        uses: ./.github/actions/get-data
+      - id: get_git_data
+        uses: ./.github/actions/get-git-data
 
       - id: get_labels
         uses: ./.github/actions/get-labels
         with:
           title: 'Etebase Server'
           authors: 'Victor R. Santos <victor-rds@users.noreply.github.com>'
-          version: ${{ steps.get_data.outputs.version }}
+          version: ${{ steps.get_git_data.outputs.source_tag }}
+
+      - id: get_etebase_tags
+        uses: ./.github/actions/get-etebase-tags
+        with:
+          baseimg: ${{ env.BASEIMG }}
+          version: ${{ steps.get_git_data.outputs.source_tag }}
+          default_tags: true
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1.2.0
@@ -47,8 +54,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           context: .
-          file: ./tags/${{ env.FLAVOUR }}/Dockerfile
-          build-args: ETE_VERSION=${{ steps.get_data.outputs.ete_version }}
+          file: ./tags/${{ env.BASEIMG }}/Dockerfile
+          build-args: ETE_VERSION=${{ steps.get_etebase_tags.outputs.ete_version }}
           labels: ${{ steps.get_labels.outputs.labels }}
-          tags: ${{ steps.get_data.outputs.tags }}
+          tags: ${{ steps.get_etebase_tags.outputs.tags }}
           push: true
