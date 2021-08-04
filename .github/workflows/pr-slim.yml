@@ -15,7 +15,7 @@ jobs:
   pr-build-slim:
     runs-on: ubuntu-latest
     env:
-      FLAVOUR: slim
+      BASEIMG: slim
 
     steps:
       - name: Checkout Dockerfiles and Context
@@ -30,6 +30,6 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: ./tags/${{ env.FLAVOUR }}/Dockerfile
-          tags: victorrds/etebase:${{ github.sha }}-${{ env.FLAVOUR }}
+          file: ./tags/${{ env.BASEIMG }}/Dockerfile
+          tags: victorrds/etebase:${{ github.sha }}-${{ env.BASEIMG }}
           push: false
