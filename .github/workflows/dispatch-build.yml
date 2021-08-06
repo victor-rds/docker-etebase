@@ -1,5 +1,5 @@
 ---
-name: Local Test
+name: Dispatch Build 
 
 on: 
   workflow_dispatch:
@@ -15,32 +15,42 @@ on:
       platforms:
         description: 'Set the platforms to build [ linux/amd64, linux/arm64, linux/arm/v7 or linux/arm/v6]'
         required: false
-        default: 'amd64'
+        default: 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6'
       pushit:
         description: 'Should push?'
         required: false
         default: 'false'
 
 jobs:
-  test-build:
+  dispatch-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v2
 
-      - id: get_labels
-        uses: ./.github/actions/get-labels
-        with:
-          title: 'Etebase Server'
-          authors: 'Victor R. Santos <victor-rds@users.noreply.github.com>'
-          version: ${{ github.event.inputs.version }}-${{ github.event.inputs.baseimg }}
-
-      - id: get_etebase_tags
-        uses: ./.github/actions/get-etebase-tags
+      - id: build_metadata
+        uses: ./.github/actions/build-metadata
         with:
           baseimg: ${{ github.event.inputs.baseimg }}
           version: ${{ github.event.inputs.version }}
-          default_tags: false
+
+      - id: docker_metadata
+        uses: docker/metadata-action@v3.4.1
+        with:
+          labels: |
+            maintainer=victor-rds
+            org.opencontainers.image.authors='Victor R. Santos <victor-rds@users.noreply.github.com>'
+          images: |
+            victorrds/etebase
+            victorrds/etesync
+          flavor: |
+            latest=false
+            suffix=${{ steps.build_metadata.outputs.suffix }}
+          tags: |
+            type=edge,branch=dev
+            type=raw,value=${{  github.event.inputs.baseimg }},suffix=
+            type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.version }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1.2.0
@@ -56,7 +66,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Test Build
+      - name: Docker Build and Push
         id: docker_build_push
         uses: docker/build-push-action@v2.6.1
         with:
@@ -64,6 +74,7 @@ jobs:
           platforms: ${{ github.event.inputs.platforms }}
           context: .
           file: ./tags/${{ github.event.inputs.baseimg }}/Dockerfile
-          build-args: ETE_VERSION=${{ steps.get_etebase_tags.outputs.ete_version }}
-          tags: ${{ steps.get_etebase_tags.outputs.tags }}
+          build-args: ETE_VERSION=${{ steps.build_metadata.outputs.ete_version }}
+          tags: ${{ steps.docker_metadata.outputs.tags }}
+          labels: ${{ steps.docker_metadata.outputs.labels }}
           push: ${{ toJSON( github.event.inputs.pushit || false ) }}
