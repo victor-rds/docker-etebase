@@ -4,6 +4,10 @@ name: Dispatch Build
 on: 
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'Branch to Checkout'
+        required: false
+        default: 'dev'
       baseimg:
         description: 'Set the base image [base, slim or alpine]'
         required: false
@@ -27,6 +31,8 @@ jobs:
     steps:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - id: build_metadata
         uses: ./.github/actions/build-metadata
