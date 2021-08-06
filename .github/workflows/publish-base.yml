@@ -15,22 +15,28 @@ jobs:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v2
 
-      - id: get_git_data
-        uses: ./.github/actions/get-git-data
-
-      - id: get_labels
-        uses: ./.github/actions/get-labels
-        with:
-          title: 'Etebase Server'
-          authors: 'Victor R. Santos <victor-rds@users.noreply.github.com>'
-          version: ${{ steps.get_git_data.outputs.source_tag }}
-
-      - id: get_etebase_tags
-        uses: ./.github/actions/get-etebase-tags
+      - id: build_metadata
+        uses: ./.github/actions/build-metadata
         with:
           baseimg: ${{ env.BASEIMG }}
-          version: ${{ steps.get_git_data.outputs.source_tag }}
-          default_tags: true
+
+      - id: docker_metadata
+        uses: docker/metadata-action@v3.4.1
+        with:
+          labels: |
+            maintainer=victor-rds
+            org.opencontainers.image.authors='Victor R. Santos <victor-rds@users.noreply.github.com>'
+          images: |
+            victorrds/etebase
+            victorrds/etesync
+          flavor: |
+            latest=true
+            suffix=${{ steps.build_metadata.outputs.suffix }}
+          tags: |
+            type=edge,branch=dev
+            type=raw,value=${{ env.BASEIMG }},suffix=
+            type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.version }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1.2.0
@@ -55,7 +61,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           context: .
           file: ./tags/${{ env.BASEIMG }}/Dockerfile
-          build-args: ETE_VERSION=${{ steps.get_etebase_tags.outputs.ete_version }}
-          labels: ${{ steps.get_labels.outputs.labels }}
-          tags: ${{ steps.get_etebase_tags.outputs.tags }}
+          build-args: ETE_VERSION=${{ steps.build_metadata.outputs.ete_version }}
+          tags: ${{ steps.docker_metadata.outputs.tags }}
+          labels: ${{ steps.docker_metadata.outputs.labels }}
           push: true
