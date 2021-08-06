@@ -1,0 +1,59 @@
+name: 'Build Metadata'
+description: 'Build metada'
+
+inputs:
+  baseimg:
+    description: 'Base image'
+    required: false
+  version:
+    description: 'Version Override'
+    required: false
+
+outputs:
+  source_name: 
+    description: "Source Name"
+    value: ${{ steps.get_git_data.outputs.source_name }}
+  source_branch: 
+    description: "Source Branch"
+    value: ${{ steps.get_git_data.outputs.source_branch }}
+  source_tag: 
+    description: "Source Tag"
+    value: ${{ steps.get_git_data.outputs.source_tag }}
+  suffix: 
+    description: "Suffix for Docker Tags"
+    value: ${{ steps.get_git_data.outputs.suffix }}
+  version: 
+    description: "Version"
+    value: ${{ steps.get_git_data.outputs.version }}
+  ete_version: 
+    description: "Etebase Version"
+    value: ${{ steps.get_git_data.outputs.ete_version }}
+
+runs:
+  using: "composite"
+  steps: 
+    - id: get_git_data
+      shell: bash
+      env:
+        BASEIMG: ${{ inputs.baseimg }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        ETE_VERSION="master"
+        SUFFIX=""
+        VERSION="${VERSION:=${GITHUB_REF#refs/heads/}}"
+        BASEIMG="${BASEIMG// }"
+
+        if [[ $VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
+          ETE_VERSION="v${VERSION}"
+        fi
+
+        if [ ! -z "${BASEIMG}" ] && [ "${BASEIMG}" != "base" ]; then
+          SUFFIX="-${BASEIMG}"
+        fi
+
+        echo ::set-output name=source_name::${GITHUB_REF#refs/*/}
+        echo ::set-output name=source_branch::${GITHUB_REF#refs/heads/}
+        echo ::set-output name=source_tag::${GITHUB_REF#refs/tags/}
+        echo ::set-output name=version::${VERSION}
+        echo ::set-output name=suffix::${SUFFIX}
+        echo ::set-output name=ete_version::${ETE_VERSION}
