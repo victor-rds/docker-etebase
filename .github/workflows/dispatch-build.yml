@@ -34,6 +34,16 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
+      - id: pushit_to_json
+        name: Cast value to JSON to preserve Boolean
+        shell: bash
+        run: |
+          if [ "${{ github.event.inputs.pushit }}" = "true" ]; then
+            echo ::set-output name=boolean::${{ toJSON(true) }}
+          else
+            echo ::set-output name=boolean::${{ toJSON(false) }}
+          fi
+
       - id: build_metadata
         uses: ./.github/actions/build-metadata
         with:
@@ -66,7 +76,7 @@ jobs:
         uses: docker/setup-buildx-action@v1.5.1
 
       - name: Login to DockerHub
-        if: ${{ github.event.inputs.pushit }}
+        if: fromJSON(steps.pushit_to_json.outputs.boolean)
         uses: docker/login-action@v1.10.0
         with:
           username: ${{ secrets.DOCKER_USER }}
@@ -83,4 +93,4 @@ jobs:
           build-args: ETE_VERSION=${{ steps.build_metadata.outputs.ete_version }}
           tags: ${{ steps.docker_metadata.outputs.tags }}
           labels: ${{ steps.docker_metadata.outputs.labels }}
-          push: ${{ toJSON( github.event.inputs.pushit || false ) }}
+          push: ${{ fromJSON(steps.pushit_to_json.outputs.boolean) }} 
