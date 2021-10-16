@@ -15,4 +15,4 @@ services:
       SUPER_PASS: Change_M3
     restart: always
     ports:
-      - "80:80"
+      - "80:3735"
