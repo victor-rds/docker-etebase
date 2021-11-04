@@ -24,7 +24,6 @@ WORKDIR ${BASE_DIR}
 # OS packages and deps installation
 # hadolint ignore=DL3008,DL3018,SC2086
 RUN set -eux; \
-    export CRYPTOGRAPHY_DONT_BUILD_RUST=1; \
     export BUILD_DEPS='build-essential libffi-dev libpq-dev libssl-dev wget'; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi7 libpq5 libssl1.1 ${BUILD_DEPS}; \
