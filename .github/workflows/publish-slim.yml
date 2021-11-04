@@ -21,7 +21,7 @@ jobs:
           baseimg: ${{ env.BASEIMG }}
 
       - id: docker_metadata
-        uses: docker/metadata-action@v3.5.0
+        uses: docker/metadata-action@v3.6.0
         with:
           labels: |
             maintainer=victor-rds
