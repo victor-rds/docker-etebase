@@ -9,7 +9,6 @@ if [ ! -z "$@" ]; then
 fi
 
 declare -r MANAGE="$BASE_DIR/manage.py"
-declare -r uWSGI='/usr/local/bin/uwsgi --ini /uwsgi-etebase.ini'
 
 declare -r C_UID="$(id -u)"
 declare -r C_GID="$(id -g)"
@@ -49,7 +48,7 @@ dckr_error() {
   exit 1
 }
 
-get_file_info () {
+get_file_info() {
   stat -c '%n | %u:%g %A' "$1"
 }
 
@@ -135,7 +134,7 @@ check_perms() {
 
   if [ "${C_UID}" -ne '0' ]; then
     if [ ! -e "${FILE_PATH}" ] && [ ! -w "${DIR_PATH}" ]; then
-      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${DIR_PATH}" "Cannot write on $(get_file_info "${DIR_PATH}")" )"
+      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${DIR_PATH}" "Cannot write on $(get_file_info "${DIR_PATH}")")"
     elif [ -e "${FILE_PATH}" ] && [ "${PERM_TYPE}" = 'w' ] && [ ! -w "${FILE_PATH}" ]; then
       dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" "Cannot write on file $(get_file_info "${FILE_PATH}")")"
     elif [ -e "${FILE_PATH}" ] && [ ! -r "${FILE_PATH}" ]; then
@@ -273,23 +272,20 @@ dckr_note 'Starting Etebase'
 declare _CMD=""
 
 case "${SERVER}" in
+'asgi' | 'uvicorn' | 'http')
+  _CMD="uvicorn etebase_server.asgi:application --host 0.0.0.0 --port ${PORT}"
+  ;;
+'uvicorn-https' | 'https')
+  _CMD="uvicorn etebase_server.asgi:application --host 0.0.0.0 --port ${PORT} --ssl-keyfile ${X509_KEY} --ssl-certfile ${X509_CRT}"
+  ;;
 'django-server')
   _CMD="${MANAGE} runserver 0.0.0.0:${PORT}"
   ;;
-'asgi' | 'daphne')
+'daphne')
   _CMD="daphne -b 0.0.0.0 -p ${PORT} etebase_server.asgi:application"
   ;;
-'uwsgi')
-  _CMD="${uWSGI}:uwsgi"
-  ;;
-'http-socket')
-  _CMD="${uWSGI}:http-socket"
-  ;;
-'https')
-  _CMD="${uWSGI}:https"
-  ;;
-'http')
-  _CMD="${uWSGI}:http"
+'uwsgi' | 'http-socket')
+  dckr_error "Options no longer supported by Etebase! See: https://github.com/etesync/server/commit/6615b149c5e334302ee21b999183d86b55b4c0c3"
   ;;
 *)
   dckr_error "Server option not supported!"

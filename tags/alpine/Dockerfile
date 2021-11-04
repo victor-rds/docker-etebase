@@ -28,7 +28,7 @@ RUN set -eux; \
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
-    pip install --no-cache-dir --progress-bar off -r ${BASE_DIR}/requirements.txt uwsgi daphne 'Twisted[tls,http2]'; \
+    pip install --no-cache-dir --progress-bar off -r ${BASE_DIR}/requirements.txt; \
     apk del .build-deps; \
     rm -r /tmp/etebase.tar.gz ${BASE_DIR}/example-configs ${BASE_DIR}/etebase-server.ini.example; \
     chown -R ${PUID}:${PGID} "${BASE_DIR}"
