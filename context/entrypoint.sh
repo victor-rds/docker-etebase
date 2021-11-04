@@ -223,21 +223,6 @@ create_superuser() {
   fi
 }
 
-generate_certs() {
-  dckr_warn "
-TLS is enabled, however neither the certificate nor the key were found!
-The correct paths are '${X509_CRT}' and '${X509_KEY}'
-Let's generate a self-sign certificate, but this isn't recommended"
-
-  local CERTS_DIR=$(dirname $X509_CRT)
-
-  if [ ! -d "${CERTS_DIR}" ]; then
-    mkdir -p "${CERTS_DIR}"
-  fi
-
-  openssl req -x509 -nodes -newkey rsa:2048 -keyout $X509_KEY -out $X509_CRT -days 365 -subj "/CN=${HOSTNAME}"
-}
-
 check_db() {
 
   $MANAGE migrate --plan 2>/dev/null | grep 'django_etebase.0001_initial' >/dev/null
@@ -280,7 +265,7 @@ if [ -w "$(grep static_root ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/static_root 
 fi
 
 if [ "${SERVER}" = 'https' ] && { [ ! -e "${X509_CRT}" ] || [ ! -e "${X509_KEY}" ]; }; then
-  generate_certs
+  dckr_error "Certificate '${X509_CRT}' or key file '${X509_KEY}' missing"
 fi
 
 dckr_note 'Starting Etebase'
