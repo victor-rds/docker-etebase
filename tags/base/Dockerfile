@@ -25,18 +25,18 @@ WORKDIR ${BASE_DIR}
 # hadolint ignore=DL3008,DL3018
 RUN set -eux; \
     # Prepare packages required by the base image
-    wget -nv --no-hsts -O /tmp/rustup-init.sh https://sh.rustup.rs; \
-    chmod 555 /tmp/rustup-init.sh; \
-    /tmp/rustup-init.sh -y -q --profile minimal; \
-    . "${HOME}"/.cargo/env; \
+    export BUILD_DEPS='cargo'; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi7 libpq5 libssl1.1 "${BUILD_DEPS}"; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" uwsgi 'uvicorn[standard]'; \
     # Remove packages no longer required by the base image
-    rustup self uninstall -y; \
-    rm /tmp/rustup-init.sh; \
+    apt-get remove --purge -y "${BUILD_DEPS}"; \
+    apt-get autoremove --purge -y; \
+    rm -rf /var/lib/apt/lists/*; \
     # Clear Downloads and set permissions
     rm -r /tmp/etebase.tar.gz "${BASE_DIR}/example-configs" "${BASE_DIR}/etebase-server.ini.example"; \
     chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${BASE_DIR}"
