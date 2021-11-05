@@ -75,21 +75,12 @@ file_env() {
 
 init_env() {
 
-  if [ "${C_UID}" -gt '0' ]; then
-    declare -g -x PUID=${C_UID}
-    declare -g -x PGID=${C_GID}
-  else
-    declare -g -x PUID=${PUID:=373}
-    declare -g -x PGID=${PGID:=373}
-    dckr_warn "Running container as Root is not recommended, please avoid if possible."
-
-    if [[ "${cms}" == @(asgi|daphne|django-server) ]]; then
-      dckr_warn "Daphne and Django Built-in Server does not support PUID/PGID change, please uWSGI."
-    fi
+  if [ ! -z "${PUID}" ] || [ ! -z "${PGID}" ]; then
+    dckr_warn "Setting PUID/PGID is no longer supported, change the user running the container"
   fi
 
-  if ! ([ "${PUID}" -gt 0 ] 2>/dev/null && [ "${PGID}" -gt 0 ] 2>/dev/null); then
-    dckr_error "PUID or GUID values not supported!"
+  if [ "${C_UID}" -eq '0' ] || [ "${C_GID}" -eq '0' ]; then
+    dckr_warn "Running container as Root is not recommended, please avoid if possible."
   fi
 
   : ${DEBUG_DJANGO:=false}
@@ -122,11 +113,6 @@ init_env() {
   fi
 }
 
-root_fix_perm() {
-  chown ${PUID}:${PGID} "${1}"
-  chmod u=rwX,g=rX,o-rwx "${1}"
-}
-
 check_perms() {
   local FILE_PATH="${1}"
   local DIR_PATH="$(dirname ${1})"
@@ -142,14 +128,6 @@ check_perms() {
     else
       dckr_note "[ $(get_file_info "${FILE_PATH}") ] permissions: Ok"
     fi
-  else
-    if [ -e "${FILE_PATH}" ]; then
-      root_fix_perm "${FILE_PATH}"
-    else
-      root_fix_perm "${DIR_PATH}"
-      chmod g+s "${DIR_PATH}"
-    fi
-    dckr_note "[ $(get_file_info "${FILE_PATH}") ] permissions: Ok"
   fi
 }
 
