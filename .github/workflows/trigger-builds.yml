@@ -13,9 +13,9 @@ on:
         required: false
         default: 'master'
       platforms:
-        description: 'Set the platforms to build [ linux/amd64, linux/arm64, linux/arm/v7 or linux/arm/v6 ]'
+        description: 'Set the platforms to build [ linux/amd64, linux/arm64 or linux/arm/v7 ]'
         required: false
-        default: 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6'
+        default: 'linux/amd64,linux/arm64,linux/arm/v7'
       pushit:
         description: 'Should push?'
         required: false
@@ -29,38 +29,43 @@ jobs:
   trigger-builds:
     runs-on: ubuntu-latest
     env:
-      JSON_INPUT: '"branch": "${{ github.event.inputs.branch }}", "version": "${{ github.event.inputs.version }}", "pushit": "${{ github.event.inputs.pushit }}", "only_edge": "${{ github.event.inputs.only_edge }}", "platforms": "${{ github.event.inputs.platforms }}"'
+      WORKFLOW: Build and Push
 
     steps:
       - id: generate-inputs
         name: Cast value to JSON to preserve Boolean
+        env:
+          JSON_INPUT: '"branch": "${{ github.event.inputs.branch }}", "version": "${{ github.event.inputs.version }}", "pushit": "${{ github.event.inputs.pushit }}", "only_edge": "${{ github.event.inputs.only_edge }}", "platforms": "${{ github.event.inputs.platforms }}"'
         shell: bash
         run: |
-          readonly JSON_START='${{ env.JSON_INPUT }}'
-          for baseimg in base slim alpine; do
-            inputs="{ ${JSON_START}, \"baseimg\": \"${baseimg}\" }"
-            echo $inputs
-            echo ::set-output name=$baseimg-inputs::${inputs}
-          done
+          readonly JSON_START='${{ env.JSON_INPUT }}'         
+
+          base_inputs="{ ${JSON_START}, \"baseimg\": \"base\" }"
+          slim_inputs="{ ${JSON_START}, \"baseimg\": \"slim\" }"
+          alpine_inputs="{ ${JSON_START}, \"baseimg\": \"alpine\" }"
+
+          echo ::set-output name=base_inputs::${base_inputs}
+          echo ::set-output name=slim_inputs::${slim_inputs}
+          echo ::set-output name=alpine_inputs::${alpine_inputs}
 
       - name: Invoke workflow Build and Push for Base tag
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Build and Push
+          workflow: ${{ env.WORKFLOW }}
           token: ${{ secrets.PERSONAL_TOKEN }}
-          inputs: ${{ steps.pushit_to_json.outputs.base-inputs }}
+          inputs: ${{ steps.generate-inputs.outputs.base_inputs }}
 
 
       - name: Invoke workflow Build and Push for Slim tag
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Build and Push
+          workflow: ${{ env.WORKFLOW }}
           token: ${{ secrets.PERSONAL_TOKEN }}
-          inputs: ${{ steps.pushit_to_json.outputs.slim-inputs }}
+          inputs: ${{ steps.generate-inputs.outputs.slim_inputs }}
 
       - name: Invoke workflow Build and Push for Alpine taf
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Build and Push
+          workflow: ${{ env.WORKFLOW }}
           token: ${{ secrets.PERSONAL_TOKEN }}
-          inputs: ${{ steps.pushit_to_json.outputs.alpine-inputs }}
+          inputs: ${{ steps.generate-inputs.outputs.alpine_inputs }}
