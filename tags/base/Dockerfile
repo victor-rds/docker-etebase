@@ -22,33 +22,32 @@ ENV PORT 3735
 WORKDIR ${BASE_DIR}
 
 # OS packages and deps installation
-# hadolint ignore=DL3008,DL3018,SC2086
+# hadolint ignore=DL3008,DL3018
 RUN set -eux; \
-    export CRYPTOGRAPHY_DONT_BUILD_RUST=1; \
-#    export BUILD_DEPS='cargo'; \
-#    apt-get update; \
-#    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${BUILD_DEPS}; \
+    # Prepare packages required by the base image
+    # None required
+    # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
-    pip install --no-cache-dir --progress-bar off -r ${BASE_DIR}/requirements.txt uwsgi uvicorn[standard]; \
-#    apt-get remove --purge -y ${BUILD_DEPS}; \
-#    apt-get autoremove --purge -y; \
-#    rm -rf /var/lib/apt/lists/*; \
-    rm -r /tmp/etebase.tar.gz ${BASE_DIR}/example-configs ${BASE_DIR}/etebase-server.ini.example; \
-    chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${BASE_DIR}"
+    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" uwsgi 'uvicorn[standard]'; \
+    # Remove packages no longer required by the base image
+    # No cleanup needed
+    # Clear Downloads and set permissions
+    rm -r /tmp/etebase.tar.gz "${BASE_DIR}/example-configs" "${BASE_DIR}/etebase-server.ini.example"; \
+    chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${BASE_DIR}"
 
 # Etebase directories and user setup 
 RUN set -eux; \
-    addgroup --system --gid ${DEFAULT_GID} etebase; \
+    addgroup --system --gid "${DEFAULT_GID}" etebase; \
     adduser --system --no-create-home --disabled-password \
-    --gecos '' --home ${BASE_DIR} --ingroup etebase --uid ${DEFAULT_UID} etebase; \
-    mkdir -p ${MEDIA_ROOT} ${STATIC_ROOT}; \
-    chown -R ${DEFAULT_UID}:${DEFAULT_GID} ${DATA_DIR} ${STATIC_ROOT}; \
-    chmod -R 750 ${DATA_DIR}; \
-    export DJANGO_STATIC_ROOT=${STATIC_ROOT}; \
-    ${BASE_DIR}/manage.py collectstatic --no-input; \
-    rm ${BASE_DIR}/secret.txt
+    --gecos '' --home ${BASE_DIR} --ingroup etebase --uid "${DEFAULT_UID}" etebase; \
+    mkdir -p "${MEDIA_ROOT}" "${STATIC_ROOT}"; \
+    chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${DATA_DIR}" "${STATIC_ROOT}"; \
+    chmod -R 750 "${DATA_DIR}"; \
+    export DJANGO_STATIC_ROOT="${STATIC_ROOT}"; \
+    "${BASE_DIR}"/manage.py collectstatic --no-input; \
+    rm "${BASE_DIR}/secret.txt"
 
 COPY --chown=${DEFAULT_UID}:${DEFAULT_GID} context /
 
