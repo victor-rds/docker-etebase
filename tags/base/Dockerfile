@@ -25,8 +25,6 @@ WORKDIR ${BASE_DIR}
 # hadolint ignore=DL3008,DL3018
 RUN set -eux; \
     # Prepare packages required by the base image
-    # None required
-    # Install Rust
     wget -nv --no-hsts -O /tmp/rustup-init.sh https://sh.rustup.rs; \
     chmod 555 /tmp/rustup-init.sh; \
     /tmp/rustup-init.sh -y -q --profile minimal; \
@@ -36,11 +34,9 @@ RUN set -eux; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" uwsgi 'uvicorn[standard]'; \
-    # Clean Rust
+    # Remove packages no longer required by the base image
     rustup self uninstall -y; \
     rm /tmp/rustup-init.sh; \
-    # Remove packages no longer required by the base image
-    # No cleanup needed
     # Clear Downloads and set permissions
     rm -r /tmp/etebase.tar.gz "${BASE_DIR}/example-configs" "${BASE_DIR}/etebase-server.ini.example"; \
     chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${BASE_DIR}"
