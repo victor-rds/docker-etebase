@@ -28,11 +28,19 @@ RUN set -eux; \
     export BUILD_DEPS='build-essential libffi-dev libpq-dev libssl-dev wget'; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi7 libpq5 libssl1.1 ${BUILD_DEPS}; \
+    # Install Rust
+    wget -nv --no-hsts -O /tmp/rustup-init.sh https://sh.rustup.rs; \
+    chmod 555 /tmp/rustup-init.sh; \
+    /tmp/rustup-init.sh -y -q --profile minimal; \
+    . "${HOME}"/.cargo/env; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" uwsgi 'uvicorn[standard]'; \
+    # Clean Rust
+    rustup self uninstall -y; \
+    rm /tmp/rustup-init.sh; \
     # Remove packages no longer required by the base image
     apt-get remove --purge -y ${BUILD_DEPS}; \
     apt-get autoremove --purge -y; \
