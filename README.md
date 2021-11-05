@@ -1,9 +1,5 @@
 # ![docker-etebase](icon.svg) Etebase Server Docker Images
 
-![Debian Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Images/badge.svg)
-![Debian Slim Images](https://github.com/victor-rds/docker-etesync-server/workflows/Debian%20Slim%20Images/badge.svg)
-![Alpine Images](https://github.com/victor-rds/docker-etesync-server/workflows/Alpine%20Images/badge.svg)
-
 Docker image for **[Etebase](https://www.etebase.com) Server**, also known as **Etesync 2.0**, based on the [server](https://github.com/etesync/server) repository by [Tom Hacohen](https://github.com/tasn).
 
 ## **:bangbang: Warning** Incompatible Versions
@@ -88,12 +84,11 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
 ### Environment Variables
 
 - **SERVER**: Defines how the container will serve the application, the options are:
-  - `http` protocol, this is the default mode;
-  - `https` same as above but with TLS/SSL support, see below how to use your own certificates;
-  - `http-socket` Similar to the first option, but without uWSGI HTTP router/proxy/load-balancer overhead, this recommended for any reverse-proxies/load balancers that support HTTP protocol, like _traefik_;
-  - `uwsgi` binary native protocol, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
-  - `asgi` or `daphne` start using [daphne](https://github.com/Django/daphne/) a HTTP, HTTP2 and WebSocket protocol server for ASGI and ASGI-HTTP, must be used with a reverse-proxy/web server that support this protocol, such as _nginx_.
-  - `Django-server` same as the first one, but this mode uses the embedded Django http server, `./manage.py runserver :3735`, this is not recommended but can be useful for debugging
+  - `uvicorn` start using [uvicorn](https://www.uvicorn.org/) a ASGI server implementation with HTTP/1.1 and WebSockets support, this runs without SSL and must be used with a reverse-proxy/web server, such as _nginx_, _traefik_ and others. 
+  Aliases: `http`, `http-socket` `asgi`
+  - `uvicorn-https` same as above but with SSL/TLS support enabled, certificates must be mounted in the container, see: . Alias: `https`
+  - Older versions had support to `uwsgi`, `daphne` and `Django-server`, but that's no longer supported see [#103](https://github.com/victor-rds/docker-etebase/issues/103)
+
 - **DEBUG**: Runs the `/entrypoint.sh` with `set -x` for debug purposes, this variable does not change **DEBUG_DJANGO** described below.
 - **AUTO_UPDATE**: Trigger database update/migration every time the container starts, default: `false`, more details below.
 - **SUPER_USER**: Username of the Django superuser (only used if no previous database is found);
@@ -180,8 +175,8 @@ If `AUTO_UPDATE` is not set you can update by running:
 
 ```docker exec -it {container_name} python manage.py migrate```
 
-### _Using uWSGI with HTTPS_
+### _Using Uvicorn with SSL/TLS_
 
-If you want to run Etebase Server HTTPS using uWSGI you need to pass certificates or the image will generate a self-signed certificate for `localhost`.
+If you want to run Etebase Server HTTPS using uvicorn you need to mount valid certificates.
 
 By default Etebase will look for the files `/certs/crt.pem` and `/certs/key.pem`, if for some reason you change this location change the **X509_CRT** and **X509_KEY** environment variables.
