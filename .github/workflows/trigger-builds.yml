@@ -1,0 +1,66 @@
+---
+name: Trigger Builds
+
+on: 
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to Checkout'
+        required: false
+        default: 'master'
+      version:
+        description: 'EteBase Version'
+        required: false
+        default: 'master'
+      platforms:
+        description: 'Set the platforms to build [ linux/amd64, linux/arm64, linux/arm/v7 or linux/arm/v6 ]'
+        required: false
+        default: 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6'
+      pushit:
+        description: 'Should push?'
+        required: false
+        default: 'false'
+      only_edge:
+        description: 'Push only edge tag?'
+        required: false
+        default: 'true'
+
+jobs:
+  trigger-builds:
+    runs-on: ubuntu-latest
+    env:
+      JSON_INPUT: '"branch": "${{ github.event.inputs.branch }}", "version": "${{ github.event.inputs.version }}", "pushit": "${{ github.event.inputs.pushit }}", "only_edge": "${{ github.event.inputs.only_edge }}", "platforms": "${{ github.event.inputs.platforms }}"'
+
+    steps:
+      - id: generate-inputs
+        name: Cast value to JSON to preserve Boolean
+        shell: bash
+        run: |
+          readonly JSON_START='${{ env.JSON_INPUT }}'
+          for baseimg in base slim alpine; do
+            inputs="{ ${JSON_START}, \"baseimg\": \"${baseimg}\" }"
+            echo $inputs
+            echo ::set-output name=$baseimg-inputs::${inputs}
+          done
+
+      - name: Invoke workflow Build and Push for Base tag
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Build and Push
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          inputs: ${{ steps.pushit_to_json.outputs.base-inputs }}
+
+
+      - name: Invoke workflow Build and Push for Slim tag
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Build and Push
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          inputs: ${{ steps.pushit_to_json.outputs.slim-inputs }}
+
+      - name: Invoke workflow Build and Push for Alpine taf
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Build and Push
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          inputs: ${{ steps.pushit_to_json.outputs.alpine-inputs }}
