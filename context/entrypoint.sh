@@ -259,7 +259,7 @@ case "${SERVER}" in
 'django-server')
   _CMD="${MANAGE} runserver 0.0.0.0:${PORT}"
   ;;
-'daphne' | 'uwsgi' | )
+'daphne' | 'uwsgi' )
   dckr_error "Options no longer supported by Etebase! https://github.com/victor-rds/docker-etebase/issues/103"
   ;;
 *)
