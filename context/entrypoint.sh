@@ -256,10 +256,8 @@ case "${SERVER}" in
 'uvicorn-https' | 'https')
   _CMD="uvicorn etebase_server.asgi:application --host 0.0.0.0 --port ${PORT} --ssl-keyfile ${X509_KEY} --ssl-certfile ${X509_CRT}"
   ;;
-'django-server')
-  _CMD="${MANAGE} runserver 0.0.0.0:${PORT}"
-  ;;
-'daphne' | 'uwsgi' )
+)
+'daphne' | 'uwsgi' | 'django-server')
   dckr_error "Options no longer supported by Etebase! https://github.com/victor-rds/docker-etebase/issues/103"
   ;;
 *)
