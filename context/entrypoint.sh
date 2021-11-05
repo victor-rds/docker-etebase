@@ -9,7 +9,6 @@ if [ ! -z "$@" ]; then
 fi
 
 declare -r MANAGE="$BASE_DIR/manage.py"
-declare -r uWSGI='/usr/local/bin/uwsgi --ini /uwsgi-etebase.ini'
 
 declare -r C_UID="$(id -u)"
 declare -r C_GID="$(id -g)"
@@ -273,23 +272,17 @@ dckr_note 'Starting Etebase'
 declare _CMD=""
 
 case "${SERVER}" in
+'asgi' | 'uvicorn' | 'http' | 'http-socket')
+  _CMD="uvicorn etebase_server.asgi:application --host 0.0.0.0 --port ${PORT}"
+  ;;
+'uvicorn-https' | 'https')
+  _CMD="uvicorn etebase_server.asgi:application --host 0.0.0.0 --port ${PORT} --ssl-keyfile ${X509_KEY} --ssl-certfile ${X509_CRT}"
+  ;;
 'django-server')
   _CMD="${MANAGE} runserver 0.0.0.0:${PORT}"
   ;;
-'asgi' | 'daphne')
-  _CMD="daphne -b 0.0.0.0 -p ${PORT} etebase_server.asgi:application"
-  ;;
-'uwsgi')
-  _CMD="${uWSGI}:uwsgi"
-  ;;
-'http-socket')
-  _CMD="${uWSGI}:http-socket"
-  ;;
-'https')
-  _CMD="${uWSGI}:https"
-  ;;
-'http')
-  _CMD="${uWSGI}:http"
+'daphne' | 'uwsgi' | )
+  dckr_error "Options no longer supported by Etebase! https://github.com/victor-rds/docker-etebase/issues/103"
   ;;
 *)
   dckr_error "Server option not supported!"
