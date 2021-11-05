@@ -25,20 +25,12 @@ WORKDIR ${BASE_DIR}
 RUN set -eux; \
     # Prepare packages required by the base image
     apk add --no-cache openssl mailcap libpq libffi bash; \
-    apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev openssl-dev postgresql-dev wget; \
-    # Install Rust
-    wget -nv --no-hsts -O /tmp/rustup-init.sh https://sh.rustup.rs; \
-    chmod 555 /tmp/rustup-init.sh; \
-    /tmp/rustup-init.sh -y -q --profile minimal; \
-    . "${HOME}"/.cargo/env; \
+    apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev openssl-dev postgresql-dev wget cargo; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" uwsgi 'uvicorn[standard]'; \
-    # Clean Rust
-    rustup self uninstall -y; \
-    rm /tmp/rustup-init.sh; \
     # Remove packages no longer required by the base image
     apk del .build-deps; \
     # Clear Downloads and set permissions
