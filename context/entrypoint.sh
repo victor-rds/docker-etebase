@@ -271,4 +271,4 @@ if [ "${DEBUG}" = "true" ]; then
   set +x
 fi
 
-exec $_CMD
+exec $_CMD "$@"
