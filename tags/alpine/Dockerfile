@@ -1,8 +1,8 @@
 FROM python:3.9.7-alpine
 LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
-ARG PUID=373
-ARG PGID=373
+ARG DEFAULT_UID=373
+ARG DEFAULT_GID=373
 ARG ETE_VERSION=master
 ARG ETE_URL="https://github.com/etesync/server/archive/${ETE_VERSION}.tar.gz"
 
@@ -31,21 +31,21 @@ RUN set -eux; \
     pip install --no-cache-dir --progress-bar off -r ${BASE_DIR}/requirements.txt uwsgi uvicorn[standard]; \
     apk del .build-deps; \
     rm -r /tmp/etebase.tar.gz ${BASE_DIR}/example-configs ${BASE_DIR}/etebase-server.ini.example; \
-    chown -R ${PUID}:${PGID} "${BASE_DIR}"
+    chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${BASE_DIR}"
 
 # Etebase directories and user setup 
 RUN set -eux; \
-    addgroup --system --gid ${PGID} etebase; \
+    addgroup --system --gid ${DEFAULT_GID} etebase; \
     adduser --system --no-create-home --disabled-password \
-    --gecos '' --home ${BASE_DIR} --ingroup etebase --uid ${PUID} etebase; \
+    --gecos '' --home ${BASE_DIR} --ingroup etebase --uid ${DEFAULT_UID} etebase; \
     mkdir -p ${MEDIA_ROOT} ${STATIC_ROOT}; \
-    chown -R ${PUID}:${PGID} ${DATA_DIR} ${STATIC_ROOT}; \
+    chown -R ${DEFAULT_UID}:${DEFAULT_GID} ${DATA_DIR} ${STATIC_ROOT}; \
     chmod -R 750 ${DATA_DIR}; \
     export DJANGO_STATIC_ROOT=${STATIC_ROOT}; \
     ${BASE_DIR}/manage.py collectstatic --no-input; \
     rm ${BASE_DIR}/secret.txt
 
-COPY --chown=${PUID}:${PGID} context /
+COPY --chown=${DEFAULT_UID}:${DEFAULT_GID} context /
 
 USER etebase:etebase
 
