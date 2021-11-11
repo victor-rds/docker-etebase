@@ -54,7 +54,7 @@ jobs:
             victorrds/etebase
             victorrds/etesync
           flavor: |
-            latest=false
+            latest=${{ ( contains(github.event.inputs.baseimg, 'base') && contains(github.event.inputs.only_edge, 'false') ) }}
             suffix=${{ steps.build_metadata.outputs.suffix }}
           tags: |
             type=edge,enable=${{ contains(github.event.inputs.only_edge, 'true') }},branch=${{ github.event.inputs.branch }}
