@@ -7,7 +7,7 @@ on:
       branch:
         description: 'Branch to Checkout'
         required: false
-        default: 'master'
+        default: 'release'
       baseimg:
         description: 'Set the base image [base, slim or alpine]'
         required: false
