@@ -5,7 +5,6 @@ on:
   pull_request:
     branches:
       - master
-      - dev
     paths:
       - "context/**"
       - "tags/slim/Dockerfile"
