@@ -84,7 +84,7 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
 ### Environment Variables
 
 - **SERVER**: Defines how the container will serve the application, the options are:
-  - `uvicorn` start using [uvicorn](https://www.uvicorn.org/) a ASGI server implementation with HTTP/1.1 and WebSockets support, this runs without SSL and must be used with a reverse-proxy/web server, such as _nginx_, _traefik_ and others. 
+  - `uvicorn` start using [uvicorn](https://www.uvicorn.org/) a ASGI server implementation with HTTP/1.1 and WebSockets support, this runs without SSL and must be used with a reverse-proxy/web server, such as _nginx_, _traefik_ and others.
   Aliases: `http`, `http-socket` `asgi`
   - `uvicorn-https` same as above but with SSL/TLS support enabled, certificates must be mounted in the container, see: . Alias: `https`
   - Older versions had support to `uwsgi`, `daphne` and `Django-server`, but that's no longer supported see [#103](https://github.com/victor-rds/docker-etebase/issues/103)
@@ -150,10 +150,6 @@ This will create a image using Etebase master branch, to build using a release v
 ```console
 docker build --build-arg ETE_VERSION=v0.5.3 -f tags/base/Dockerfile -t etebase:dev .
 ```
-
-## Contributing
-
-Please use the [dev branch](https://github.com/victor-rds/docker-etebase/tree/dev) code, not the master, when creating pull requests
 
 ## Advanced Usage
 
