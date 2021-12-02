@@ -4,15 +4,18 @@ if [ "${DEBUG}" = "true" ]; then
   set -x
 fi
 
-if [ ! -z "$@" ]; then
+if [ -n "$*" ]; then
   exec "$@"
 fi
 
+C_UID="$(id -u)"
+C_GID="$(id -g)"
+
+readonly C_UID
+readonly C_GID
+
+
 declare -r MANAGE="$BASE_DIR/manage.py"
-
-declare -r C_UID="$(id -u)"
-declare -r C_GID="$(id -g)"
-
 declare -r ERROR_PERM_TEMPLATE="
 -----------------------------------------------------------------
 Wrong permissions in: %s
@@ -75,7 +78,7 @@ file_env() {
 
 init_env() {
 
-  if [ ! -z "${PUID}" ] || [ ! -z "${PGID}" ]; then
+  if [ -n "${PUID}" ] || [ -n "${PGID}" ]; then
     dckr_warn "Setting PUID/PGID is no longer supported, change the user running the container"
   fi
 
@@ -83,10 +86,10 @@ init_env() {
     dckr_warn "Running container as Root is not recommended, please avoid if possible."
   fi
 
-  : ${DEBUG_DJANGO:=false}
-  : ${LANGUAGE_CODE:=en-us}
-  : ${TIME_ZONE:=UTC}
-  : ${ALLOWED_HOSTS:=*}
+  : "${DEBUG_DJANGO:=false}"
+  : "${LANGUAGE_CODE:=en-us}"
+  : "${TIME_ZONE:=UTC}"
+  : "${ALLOWED_HOSTS:=*}"
 
   declare -g -x X509_CRT=${X509_CRT:=$DATA_DIR/certs/crt.pem}
   declare -g -x X509_KEY=${X509_KEY:=$DATA_DIR/certs/key.pem}
@@ -95,7 +98,8 @@ init_env() {
   file_env 'DATABASE_NAME'
 
   if [ "${DB_ENGINE}" = "sqlite" ]; then
-    local _DB_FILENAME="$(basename "${DATABASE_NAME}")"
+    local _DB_FILENAME
+    _DB_FILENAME="$(basename "${DATABASE_NAME}")"
 
     if [ -z "${_DB_FILENAME}" ]; then
       DATABASE_NAME="${DATA_DIR}/db.sqlite3"
@@ -103,7 +107,7 @@ init_env() {
       DATABASE_NAME="${DATABASE_NAME}/db.sqlite3"
     fi
   elif [ "${DB_ENGINE}" = "postgres" ]; then
-    : ${DATABASE_NAME:=etebase}
+    : "${DATABASE_NAME:=etebase}"
   else
     dckr_error "Database option not supported!"
   fi
@@ -115,10 +119,13 @@ init_env() {
 
 check_perms() {
   local FILE_PATH="${1}"
-  local DIR_PATH="$(dirname ${1})"
+  local DIR_PATH
   local PERM_TYPE=${2}
 
+  DIR_PATH="$(dirname "${1}")"
+
   if [ "${C_UID}" -ne '0' ]; then
+    # shellcheck disable=SC2059
     if [ ! -e "${FILE_PATH}" ] && [ ! -w "${DIR_PATH}" ]; then
       dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${DIR_PATH}" "Cannot write on $(get_file_info "${DIR_PATH}")" )"
     elif [ -e "${FILE_PATH}" ] && [ "${PERM_TYPE}" = 'w' ] && [ ! -w "${FILE_PATH}" ]; then
@@ -145,7 +152,7 @@ time_zone = ${TIME_ZONE}
 
 [allowed_hosts]
 allowed_host1 = ${ALLOWED_HOSTS}
-" >$ETEBASE_EASY_CONFIG_PATH
+" >"${ETEBASE_EASY_CONFIG_PATH}"
 
   if [ "${DB_ENGINE}" = "postgres" ]; then
     file_env 'DATABASE_USER' "${DATABASE_NAME}"
@@ -158,12 +165,12 @@ user = ${DATABASE_USER}
 password = ${DATABASE_PASSWORD}
 host = ${DATABASE_HOST:=database}
 port = ${DATABASE_PORT:=5432}
-" >>$ETEBASE_EASY_CONFIG_PATH
+" >>"${ETEBASE_EASY_CONFIG_PATH}"
   else
     echo "[database]
 engine = django.db.backends.sqlite3
 name = ${DATABASE_NAME}
-" >>$ETEBASE_EASY_CONFIG_PATH
+" >>"${ETEBASE_EASY_CONFIG_PATH}"
   fi
 
   dckr_note "Generated ${ETEBASE_EASY_CONFIG_PATH}"
@@ -174,7 +181,7 @@ migrate() {
 
   $MANAGE showmigrations -l | grep -v '\[X\]'
 
-  if [ ! -z "${_AUTO}" ]; then
+  if [ -n "${_AUTO}" ]; then
     $MANAGE migrate
   else
     dckr_warn "If necessary please run: docker exec -it ${HOSTNAME} python manage.py migrate"
@@ -205,39 +212,39 @@ check_db() {
   $MANAGE migrate --plan 2>/dev/null | grep 'django_etebase.0001_initial' >/dev/null
   local _PS=("${PIPESTATUS[@]}")
 
-  if [ ${_PS[0]} -eq "0" ] && [ ${_PS[1]} -eq "0" ]; then
+  if [ "${_PS[0]}" -eq "0" ] && [ "${_PS[1]}" -eq "0" ]; then
     migrate true
     create_superuser
-  elif [ ${_PS[0]} -eq "0" ] && [ ${_PS[1]} -ne "0" ]; then
+  elif [ "${_PS[0]}" -eq "0" ] && [ "${_PS[1]}" -ne "0" ]; then
     migrate "${AUTO_UPDATE}"
   else
     if [ "${DB_ENGINE}" = "postgres" ]; then
       local ERROR_MESSAGE="The PostgresSQL Database is not responding *OR*\n"
     fi
-
-    dckr_error "$(printf \"${ERROR_DB_TEMPLATE}\" \"${ERROR_MESSAGE}\")"
+    # shellcheck disable=SC2059
+    dckr_error "$(printf "${ERROR_DB_TEMPLATE}" "${ERROR_MESSAGE}")"
   fi
 }
 
 init_env
 
-check_perms ${ETEBASE_EASY_CONFIG_PATH}
+check_perms "${ETEBASE_EASY_CONFIG_PATH}"
 
 if [ -e "${ETEBASE_EASY_CONFIG_PATH}" ]; then
-  check_perms "$(grep secret_file ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/secret_file = //g')"
-  check_perms "$(grep media_root ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/media_root = //g')" 'w'
+  check_perms "$(grep secret_file "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/secret_file = //g')"
+  check_perms "$(grep media_root "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/media_root = //g')" 'w'
   if grep sqlite3 "${ETEBASE_EASY_CONFIG_PATH}" >/dev/null; then
-    check_perms "$(grep name ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/name = //g')" 'w'
+    check_perms "$(grep name "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/name = //g')" 'w'
   fi
 fi
 
-if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] || [ ! -z "${REGEN_INI}" ]; then
+if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] || [ -n "${REGEN_INI}" ]; then
   gen_inifile
 fi
 
 check_db
 
-if [ -w "$(grep static_root ${ETEBASE_EASY_CONFIG_PATH} | sed -e 's/static_root = //g')" ]; then
+if [ -w "$(grep static_root "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/static_root = //g')" ]; then
   $MANAGE collectstatic --no-input
 fi
 
