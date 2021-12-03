@@ -2,14 +2,6 @@
 
 Docker image for **[Etebase](https://www.etebase.com) Server**, also known as **Etesync 2.0**, based on the [server](https://github.com/etesync/server) repository by [Tom Hacohen](https://github.com/tasn).
 
-## **:bangbang: Warning** Incompatible Versions
-
-**Etesync 1.0 and Etebase (Etesync 2.0) database and server are incompatible**, given the end-to-end encryption nature and structural changes of this software is impossible to migrate the data without knowing the users keys.
-
-To move the data, one you must create a new instance with a new database, while running both servers at the same time, use the web client tool or mobile applications to migrate your data, after all users migrated the legacy server can be shutdown.
-
-The new images have breaking changes, to avoid any damage, the `entrypoint.sh` will check if the database is compatible before making any changes.
-
 ## Tags
 
 The following tags are built on latest python image and latest version of Etebase Server
@@ -19,12 +11,6 @@ The following tags are built on latest python image and latest version of Etebas
 - `alpine` [(tags/alpine/Dockerfile)](tags/alpine/Dockerfile)
 
 Release builds are available as versioned tags, for example: `X.Y.Z` or `X.Y.Z-type`
-
-Etesync 1.0 images are available through the `legacy` tags, I will try to keep python base image up to date but no more work will be done.
-
-- `legacy` [(legacy:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/base/Dockerfile)
-- `legacy-slim`  [(legacy:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/slim/Dockerfile)
-- `legacy-alpine` [(legacy:tags/alpine/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/alpine/Dockerfile)
 
 ## Usage
 
@@ -137,6 +123,11 @@ Currently, this is only supported for DB_ENGINE, DATABASE_NAME, DATABASE_USER, D
 
 This image exposes the **3735/TCP** Port
 
+## Qustion & Issues
+
+For questions please use [Discussions](https://github.com/victor-rds/docker-etebase/discussions).
+Any bugs please report to the repository [Issue Tracker](https://github.com/victor-rds/docker-etebase/issues)
+
 ## How to Build
 
 To build the images just choose which Dockerfile and run:
@@ -176,3 +167,17 @@ If `AUTO_UPDATE` is not set you can update by running:
 If you want to run Etebase Server HTTPS using uvicorn you need to mount valid certificates.
 
 By default Etebase will look for the files `/certs/crt.pem` and `/certs/key.pem`, if for some reason you change this location change the **X509_CRT** and **X509_KEY** environment variables.
+
+## **:bangbang: Warning** Incompatible Versions
+
+**Etesync 1.0 and Etebase (Etesync 2.0), database and server, are incompatible**, given the end-to-end encryption nature and structural changes of this software is impossible to migrate the data without knowing the users keys.
+
+To move the data, one you must create a new instance with a new database, while running both servers at the same time, use the web client tool or mobile applications to migrate your data, after all users migrated the legacy server can be shutdown.
+
+The new images have breaking changes, to avoid any damage, the `entrypoint.sh` will check if the database is compatible before making any changes.
+
+Etesync 1.0 images are available through the `legacy` tags, base images are outdated and no more work will be done.
+
+- `legacy` [(legacy:tags/latest/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/base/Dockerfile)
+- `legacy-slim`  [(legacy:tags/slim/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/slim/Dockerfile)
+- `legacy-alpine` [(legacy:tags/alpine/Dockerfile)](https://github.com/victor-rds/docker-etesync-server/blob/legacy/tags/alpine/Dockerfile)
