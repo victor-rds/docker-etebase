@@ -42,7 +42,7 @@ dckr_error() {
   exit 1
 }
 
-get_file_info () {
+get_file_info() {
   stat -c '%n | %u:%g %A' "$1"
 }
 
@@ -302,7 +302,7 @@ case "${SERVER}" in
   ;;
 esac
 
-if [ "${DEBUG}" = "true" ]; then
+if [ "${SHELL_DEBUG}" = "true" ]; then
   set +x
 fi
 
