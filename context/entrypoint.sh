@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "${DEBUG}" = "true" ]; then
+if [ "${SHELL_DEBUG}" = "true" ]; then
   set -x
 fi
 
@@ -13,7 +13,6 @@ C_GID="$(id -g)"
 
 readonly C_UID
 readonly C_GID
-
 
 declare -r MANAGE="$BASE_DIR/manage.py"
 declare -r ERROR_PERM_TEMPLATE="
@@ -40,14 +39,21 @@ dckr_log() {
   shift
   printf '%s [%s] [Entrypoint]: %s\n' "$(date -Iseconds)" "${type}" "$*"
 }
-dckr_note() {
-  dckr_log Note "$@"
+
+dckr_debug() {
+  if [ "${DEBUG}" = "true" ]; then
+    dckr_log Debug "$@"
+  fi
+}
+
+dckr_info() {
+  dckr_log Info "$@"
 }
 dckr_warn() {
   dckr_log Warn "$@" >&2
 }
 dckr_error() {
-  dckr_log ERROR "$@" >&2
+  dckr_log Error "$@" >&2
   exit 1
 }
 
@@ -133,7 +139,7 @@ check_perms() {
     elif [ -e "${FILE_PATH}" ] && [ ! -r "${FILE_PATH}" ]; then
       dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" "Cannot read the file $(get_file_info "${FILE_PATH}")")"
     else
-      dckr_note "[ $(get_file_info "${FILE_PATH}") ] permissions: Ok"
+      dckr_info "[ $(get_file_info "${FILE_PATH}") ] permissions: Ok"
     fi
   fi
 }
@@ -173,7 +179,7 @@ name = ${DATABASE_NAME}
 " >>"${ETEBASE_EASY_CONFIG_PATH}"
   fi
 
-  dckr_note "Generated ${ETEBASE_EASY_CONFIG_PATH}"
+  dckr_info "Generated ${ETEBASE_EASY_CONFIG_PATH}"
 }
 
 migrate() {
@@ -192,12 +198,12 @@ create_superuser() {
   file_env 'SUPER_USER'
 
   if [ "${SUPER_USER}" ]; then
-    dckr_note 'Creating Super User'
+    dckr_info 'Creating Super User'
     file_env 'SUPER_PASS'
 
     if [ -z "$SUPER_PASS" ]; then
       SUPER_PASS=$(openssl rand -base64 24)
-      dckr_note "
+      dckr_info "
 ----------------------------------------------------
 | Admin Password: ${SUPER_PASS} |
 ----------------------------------------------------"
@@ -252,7 +258,7 @@ if [ "${SERVER}" = 'https' ] && { [ ! -e "${X509_CRT}" ] || [ ! -e "${X509_KEY}"
   dckr_error "Certificate '${X509_CRT}' or key file '${X509_KEY}' missing"
 fi
 
-dckr_note 'Starting Etebase'
+dckr_info 'Starting Etebase'
 
 declare _CMD=""
 
