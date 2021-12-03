@@ -15,23 +15,8 @@ readonly C_UID
 readonly C_GID
 
 declare -r MANAGE="$BASE_DIR/manage.py"
-declare -r ERROR_PERM_TEMPLATE="
------------------------------------------------------------------
-Wrong permissions in: %s
-%s
-Please check the permissions or the user runnning the container.
-Current user id: ${C_UID} | Current group id: ${C_GID}
-More details about changing container user:
-https://docs.docker.com/engine/reference/run/#user
------------------------------------------------------------------"
-
-declare -r ERROR_DB_TEMPLATE='
----------------------------------------------------------------------
-%bThis database schema is not compatible with Etebase (EteSync 2.0)
-To avoid any data damage the container will now fail to start
-Please save your data follow this instructions instructions:
-https://github.com/etesync/server#updating-from-version-050-or-before
----------------------------------------------------------------------'
+declare -r ERROR_PERM_TEMPLATE="%s : Permission Denied. Please check the volume permissions or the user runnning the container."
+declare -r ERROR_DB_TEMPLATE='Failed do access %s database. Please check the database connection or file permission.'
 
 # logging functions
 dckr_log() {
@@ -123,28 +108,71 @@ init_env() {
   fi
 }
 
-check_perms() {
-  local FILE_PATH="${1}"
-  local DIR_PATH
-  local PERM_TYPE=${2}
+output_perms() {
+  local FD="${1}"
+  local BIT="${2:-r}"
 
-  DIR_PATH="$(dirname "${1}")"
+  local PROK="f"
+  local PWOK="f"
 
-  if [ "${C_UID}" -ne '0' ]; then
-    # shellcheck disable=SC2059
-    if [ ! -e "${FILE_PATH}" ] && [ ! -w "${DIR_PATH}" ]; then
-      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${DIR_PATH}" "Cannot write on $(get_file_info "${DIR_PATH}")" )"
-    elif [ -e "${FILE_PATH}" ] && [ "${PERM_TYPE}" = 'w' ] && [ ! -w "${FILE_PATH}" ]; then
-      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" "Cannot write on file $(get_file_info "${FILE_PATH}")")"
-    elif [ -e "${FILE_PATH}" ] && [ ! -r "${FILE_PATH}" ]; then
-      dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${FILE_PATH}" "Cannot read the file $(get_file_info "${FILE_PATH}")")"
+  if [ ! -e "${FD}" ]; then
+    dckr_debug "${FD} does not exist"
+  else
+    dckr_debug "$(get_file_info "${FD}")"
+
+    if [ -r "${FD}" ]; then
+      dckr_debug "${FD} is readable"
+      PROK='t'
     else
-      dckr_info "[ $(get_file_info "${FILE_PATH}") ] permissions: Ok"
+      dckr_debug "${FD} is not readable"
+    fi
+
+    if [ -w "${FD}" ]; then
+      dckr_debug "${FD} is writable"
+      PWOK='t'
+    else
+      dckr_debug "${FD} is not writable"
+    fi
+
+    if [ "$PROK" = 't' ] && { [ "$BIT" = 'r' ] || [ "$PWOK" = 't' ]; }; then
+      dckr_info "Permissions: Ok"
+    else
+      if [ "$BIT" = 'w' ]; then
+        dckr_warn "Permissions: Failed [ Cannot write ${FD} ]"
+      else
+        dckr_warn "Permissions: Failed [ Cannot read ${FD} ]"
+      fi
     fi
   fi
 }
 
+check_perms() {
+  local PRNT
+  local PATH_TYPE
+
+  if [ ! -d "${1}" ]; then
+    PATH_TYPE='file'
+    PRNT="$(dirname "${1}")"
+  else
+    PATH_TYPE='dir'
+  fi
+
+  dckr_info '------------------------------------------------'
+  dckr_info "Check permission of ${1}"
+
+  if [ ! -e "${1}" ] && [ "${PATH_TYPE}" = 'file' ]; then
+    dckr_info "${1} does not exist"
+    dckr_info 'Testing parent directory permissions'
+    output_perms "${PRNT}" 'w'
+  else
+    output_perms "${1}" "${2}"
+  fi
+  dckr_info '------------------------------------------------' 
+}
+
 gen_inifile() {
+  # shellcheck disable=SC2059
+  touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${ETEBASE_EASY_CONFIG_PATH}" )"
 
   echo "[global]
 secret_file = ${SECRET_FILE}
@@ -224,11 +252,8 @@ check_db() {
   elif [ "${_PS[0]}" -eq "0" ] && [ "${_PS[1]}" -ne "0" ]; then
     migrate "${AUTO_UPDATE}"
   else
-    if [ "${DB_ENGINE}" = "postgres" ]; then
-      local ERROR_MESSAGE="The PostgresSQL Database is not responding *OR*\n"
-    fi
     # shellcheck disable=SC2059
-    dckr_error "$(printf "${ERROR_DB_TEMPLATE}" "${ERROR_MESSAGE}")"
+    dckr_error "$(printf "${ERROR_DB_TEMPLATE}" "${DB_ENGINE}")"
   fi
 }
 
