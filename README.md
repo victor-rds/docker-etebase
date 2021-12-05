@@ -75,7 +75,8 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
   - `uvicorn-https` same as above but with SSL/TLS support enabled, certificates must be mounted in the container, see: . Alias: `https`
   - Older versions had support to `uwsgi`, `daphne` and `Django-server`, but that's no longer supported see [#103](https://github.com/victor-rds/docker-etebase/issues/103)
 
-- **DEBUG**: Runs the `/entrypoint.sh` with `set -x` for debug purposes, this variable does not change **DEBUG_DJANGO** described below.
+- **DEBUG**: Verbose mode provides additional messages from the `/entrypoint.sh`, this does not change the output of the etebase server.
+- **SHELL_DEBUG**: Runs the `/entrypoint.sh` with `set -x` for debug purposes.
 - **AUTO_UPDATE**: Trigger database update/migration every time the container starts, default: `false`, more details below.
 - **SUPER_USER**: Username of the Django superuser (only used if no previous database is found);
   - **SUPER_PASS**: Password of the Django superuser (optional, one will be generated if not set);
