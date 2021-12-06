@@ -45,7 +45,7 @@ jobs:
           version: ${{ github.event.inputs.version }}
 
       - id: docker_metadata
-        uses: docker/metadata-action@v3.6.0
+        uses: docker/metadata-action@v3.6.1
         with:
           labels: |
             maintainer=victor-rds
