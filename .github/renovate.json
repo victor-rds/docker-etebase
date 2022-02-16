@@ -1,0 +1,12 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base",
+        "group:all"
+    ],
+    "enabledManagers": [
+        "dockerfile",
+        "github-actions"
+    ],
+    "excludeCommitPaths": ["Dockerfile.template"]
+}
