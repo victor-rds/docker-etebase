@@ -243,7 +243,7 @@ create_superuser() {
 
 check_db() {
 
-  $MANAGE migrate --plan 2>/dev/null | grep 'django_etebase.0001_initial' >/dev/null
+  $MANAGE migrate --plan 2>/tmp/db_error | grep 'django_etebase.0001_initial' >/dev/null
   local _PS=("${PIPESTATUS[@]}")
 
   if [ "${_PS[0]}" -eq "0" ] && [ "${_PS[1]}" -eq "0" ]; then
@@ -253,7 +253,7 @@ check_db() {
     migrate "${AUTO_UPDATE}"
   else
     # shellcheck disable=SC2059
-    dckr_error "$(printf "${ERROR_DB_TEMPLATE}" "${DB_ENGINE}")"
+    dckr_error "$(printf "${ERROR_DB_TEMPLATE}" "${DB_ENGINE}")$(echo && cat /tmp/db_error)"
   fi
 }
 
