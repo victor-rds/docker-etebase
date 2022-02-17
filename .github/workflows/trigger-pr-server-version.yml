@@ -1,0 +1,62 @@
+---
+name: Trigger Builds Server Version Test
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "server_version"
+
+jobs:
+  trigger-pr-version:
+    runs-on: ubuntu-latest
+    env:
+      WORKFLOW: Build and Push
+
+    steps:
+      - name: Checkout Dockerfiles and Context
+        uses: actions/checkout@v2
+
+      - id: server_tag
+        shell: bash
+        run: |
+          source server_version
+          echo ::set-output name=version::${ETESYNC_VERSION}
+
+      - id: generate-inputs
+        name: Cast value to JSON to preserve Boolean
+        env:
+          JSON_INPUT: '"branch": "release", "version": "${{ steps.server_tag.outputs.version }}", "pushit": "false", "only_edge": "false", "platforms": "linux/amd64,linux/arm64,linux/arm/v7"'
+        shell: bash
+        run: |
+          readonly JSON_START='${{ env.JSON_INPUT }}'         
+
+          base_inputs="{ ${JSON_START}, \"baseimg\": \"base\" }"
+          slim_inputs="{ ${JSON_START}, \"baseimg\": \"slim\" }"
+          alpine_inputs="{ ${JSON_START}, \"baseimg\": \"alpine\" }"
+
+          echo ::set-output name=base_inputs::${base_inputs}
+          echo ::set-output name=slim_inputs::${slim_inputs}
+          echo ::set-output name=alpine_inputs::${alpine_inputs}
+
+      - name: Invoke workflow Build and Push for Base tag
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: ${{ env.WORKFLOW }}
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          inputs: ${{ steps.generate-inputs.outputs.base_inputs }}
+
+      - name: Invoke workflow Build and Push for Slim tag
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: ${{ env.WORKFLOW }}
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          inputs: ${{ steps.generate-inputs.outputs.slim_inputs }}
+
+      - name: Invoke workflow Build and Push for Alpine taf
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: ${{ env.WORKFLOW }}
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          inputs: ${{ steps.generate-inputs.outputs.alpine_inputs }}
