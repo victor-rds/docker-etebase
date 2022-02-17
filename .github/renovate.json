@@ -5,8 +5,24 @@
         "group:all"
     ],
     "enabledManagers": [
+        "regex",
         "dockerfile",
         "github-actions"
     ],
-    "excludeCommitPaths": ["Dockerfile.template"]
+    "excludeCommitPaths": ["vendor/golang.org/x/text/**"],
+    "major": {
+        "dependencyDashboardApproval": true
+    },
+    "regexManagers": [
+        {
+            "fileMatch": [
+                "^server_version$"
+            ],
+            "matchStrings": ["export ETESYNC_VERSION=(?<currentValue>.*?)"],
+            "depNameTemplate": "etesync/server",
+            "datasourceTemplate": "github-tags",
+            "versioningTemplate": "semver-coerced"    
+        }
+    ],
+    "pinDigests": false
 }
