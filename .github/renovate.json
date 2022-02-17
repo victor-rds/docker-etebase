@@ -1,0 +1,57 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base",
+        "group:all"
+    ],
+    "enabledManagers": [
+        "regex",
+        "dockerfile",
+        "github-actions"
+    ],
+    "excludeCommitPaths": [
+        "Dockerfile.template"
+    ],
+    "major": {
+        "dependencyDashboardApproval": true
+    },
+    "packageRules": [
+        {
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "python"
+            ],
+            "versioning": "pep440"
+        },
+        {
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "python"
+            ],
+            "matchUpdateTypes": [
+                "major",
+                "minor"
+            ],
+            "versioning": "pep440",
+            "enabled": false
+        }
+    ],
+    "regexManagers": [
+        {
+            "fileMatch": [
+                "^server_version$"
+            ],
+            "matchStrings": [
+                "^export ETESYNC_VERSION=(?<currentValue>.*?)$"
+            ],
+            "depNameTemplate": "etesync/server",
+            "datasourceTemplate": "github-tags",
+            "versioningTemplate": "semver-coerced"
+        }
+    ],
+    "pinDigests": false
+}
