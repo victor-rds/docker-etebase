@@ -36,7 +36,6 @@
                 "major",
                 "minor"
             ],
-            "versioning": "pep440",
             "enabled": false
         }
     ],
