@@ -63,7 +63,7 @@ jobs:
 
       - name: Login to DockerHub
         if: contains(github.event.inputs.pushit, 'true')
-        uses: docker/login-action@v1.12.0
+        uses: docker/login-action@v1.13.0
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
