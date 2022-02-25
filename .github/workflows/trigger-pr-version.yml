@@ -26,7 +26,7 @@ jobs:
         name: Cast value to JSON to preserve Boolean
         env:
           JSON_INPUT: >-
-            "ref": "${GITHUB_REF}",
+            ref: ${{ github.event.pull_request.head.ref }},
             "version": "${{ steps.server_tag.outputs.version }}",
             "pushit": "false",
             "platforms": "linux/amd64",
@@ -49,6 +49,7 @@ jobs:
           workflow: ${{ env.WORKFLOW }}
           token: ${{ secrets.PERSONAL_TOKEN }}
           inputs: ${{ steps.generate-inputs.outputs.base_inputs }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Invoke workflow Build and Push for Slim tag
         uses: benc-uk/workflow-dispatch@v1
@@ -56,6 +57,7 @@ jobs:
           workflow: ${{ env.WORKFLOW }}
           token: ${{ secrets.PERSONAL_TOKEN }}
           inputs: ${{ steps.generate-inputs.outputs.slim_inputs }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Invoke workflow Build and Push for Alpine taf
         uses: benc-uk/workflow-dispatch@v1
@@ -63,3 +65,4 @@ jobs:
           workflow: ${{ env.WORKFLOW }}
           token: ${{ secrets.PERSONAL_TOKEN }}
           inputs: ${{ steps.generate-inputs.outputs.alpine_inputs }}
+          ref: ${{ github.event.pull_request.head.ref }}
