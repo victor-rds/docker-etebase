@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - id: server_tag
         shell: bash
@@ -26,7 +28,7 @@ jobs:
         name: Cast value to JSON to preserve Boolean
         env:
           JSON_INPUT: >-
-            ref: ${{ github.event.pull_request.head.ref }},
+            "ref": "${{ github.event.pull_request.head.ref }}",
             "version": "${{ steps.server_tag.outputs.version }}",
             "pushit": "false",
             "platforms": "linux/amd64",
