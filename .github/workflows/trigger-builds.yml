@@ -20,10 +20,10 @@ on:
         description: 'Should push?'
         required: false
         default: 'false'
-      only_edge:
-        description: 'Push only edge tag?'
-        required: false
-        default: 'true'
+      tag:
+        description: 'Tag'
+        required: true
+        default: ''
 
 jobs:
   trigger-builds:
@@ -35,7 +35,12 @@ jobs:
       - id: generate-inputs
         name: Cast value to JSON to preserve Boolean
         env:
-          JSON_INPUT: '"branch": "${{ github.event.inputs.branch }}", "version": "${{ github.event.inputs.version }}", "pushit": "${{ github.event.inputs.pushit }}", "only_edge": "${{ github.event.inputs.only_edge }}", "platforms": "${{ github.event.inputs.platforms }}"'
+          JSON_INPUT: >- 
+            "ref": "${{ github.event.inputs.branch }}",
+            "version": "${{ github.event.inputs.version }}",
+            "pushit": "${{ github.event.inputs.pushit }}",
+            "tag": "${{ github.event.inputs.tag }}", 
+            "platforms": "${{ github.event.inputs.platforms }}"'
         shell: bash
         run: |
           readonly JSON_START='${{ env.JSON_INPUT }}'         

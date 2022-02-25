@@ -3,8 +3,6 @@ name: Trigger Builds Server Version Test
 
 on:
   pull_request:
-    branches:
-      - master
     paths:
       - "server_version"
 
@@ -27,7 +25,12 @@ jobs:
       - id: generate-inputs
         name: Cast value to JSON to preserve Boolean
         env:
-          JSON_INPUT: '"branch": "release", "version": "${{ steps.server_tag.outputs.version }}", "pushit": "false", "only_edge": "false", "platforms": "linux/amd64,linux/arm64,linux/arm/v7"'
+          JSON_INPUT: >-
+            "ref": "${GITHUB_REF}",
+            "version": "${{ steps.server_tag.outputs.version }}",
+            "pushit": "false",
+            "platforms": "linux/amd64",
+            "tag": ""
         shell: bash
         run: |
           readonly JSON_START='${{ env.JSON_INPUT }}'         

@@ -1,0 +1,68 @@
+name: 'Build Metadata'
+description: 'Build metada'
+
+inputs:
+  baseimg:
+    description: 'Base image'
+    required: false
+  version:
+    description: 'Version Override'
+    default: 'stable'
+    required: false
+
+outputs:
+  source_name: 
+    description: "Source Name"
+    value: ${{ steps.get_git_data.outputs.source_name }}
+  source_ref: 
+    description: "Source Ref"
+    value: ${{ steps.get_git_data.outputs.source_ref }}
+  suffix: 
+    description: "Suffix for Docker Tags"
+    value: ${{ steps.get_git_data.outputs.suffix }}
+  version: 
+    description: "Version"
+    value: ${{ steps.get_git_data.outputs.version }}
+  semver: 
+    description: "If version is a valid SEMVER"
+    value: ${{ steps.get_git_data.outputs.semver }}
+  ete_version: 
+    description: "Etebase Version"
+    value: ${{ steps.get_git_data.outputs.ete_version }}
+
+runs:
+  using: "composite"
+  steps: 
+    - id: get_git_data
+      shell: bash
+      env:
+        BASEIMG: ${{ inputs.baseimg }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        source server_version
+
+        if [ ${VERSION} != stable ]; then
+          ETESYNC_VERSION="v${VERSION}"
+        fi
+
+        SEMVER='false'
+
+        if [[ ${ETESYNC_VERSION} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          SEMVER='true'
+        fi
+
+        SUFFIX=""
+        BASEIMG="${BASEIMG// }"
+
+        if [ ! -z "${BASEIMG}" ] && [ "${BASEIMG}" != "base" ]; then
+          SUFFIX="-${BASEIMG}"
+        fi
+
+        VERSION="${ETESYNC_VERSION#v}-${GITHUB_REF#refs/*/}${SUFFIX}"
+
+        echo ::set-output name=source_name::${GITHUB_REF#refs/*/}
+        echo ::set-output name=source_ref::${GITHUB_REF}
+        echo ::set-output name=version::${VERSION}
+        echo ::set-output name=suffix::${SUFFIX}
+        echo ::set-output name=semver::${SEMVER}
+        echo ::set-output name=ete_version::${ETESYNC_VERSION}

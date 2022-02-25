@@ -21,7 +21,12 @@ jobs:
       - id: generate-inputs
         name: Cast value to JSON to preserve Boolean
         env:
-          JSON_INPUT: '"branch": "release", "version": "master", "pushit": "true", "only_edge": "true", "platforms": "linux/amd64,linux/arm64,linux/arm/v7"'
+          JSON_INPUT: >- 
+            "ref": "release",
+            "version": "master",
+            "pushit": "true",
+            "platforms": "linux/amd64,linux/arm64,linux/arm/v7",
+            "tag": "edge"
         shell: bash
         run: |
           readonly JSON_START='${{ env.JSON_INPUT }}'         
