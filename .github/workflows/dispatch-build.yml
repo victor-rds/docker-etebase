@@ -57,7 +57,7 @@ jobs:
             latest=${{ ( github.event.inputs.baseimg == 'base' && github.event.inputs.version == 'stable' ) }}
             suffix=${{ steps.build_metadata.outputs.suffix }}
           tags: |
-            type=edge,enable=${{ github.event.inputs.tag == 'edge' }},branch=${{ github.event.inputs.ref }}
+            type=edge,enable=${{ github.event.inputs.tag == 'edge' }},branch=${{ steps.build_metadata.outputs.source_name }}
             type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' && github.event.inputs.tag != 'edge' }}
             type=raw,value=${{ github.event.inputs.baseimg }},suffix=,enable=${{ github.event.inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
             type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ github.event.inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
