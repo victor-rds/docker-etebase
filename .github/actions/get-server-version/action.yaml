@@ -8,7 +8,7 @@ inputs:
 
 outputs:
   version:
-    description: "Etebase Version (without atached 'v')"
+    description: "Etebase Version"
     value: ${{ steps.get_version_file.outputs.version }}
 
 runs:
@@ -25,4 +25,4 @@ runs:
           ETESYNC_VERSION="${OVERRIDE}"
         fi
 
-        echo ::set-output name=version::${ETESYNC_VERSION#v}
+        echo ::set-output name=version::${ETESYNC_VERSION}
