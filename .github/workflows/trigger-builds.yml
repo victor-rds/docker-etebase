@@ -1,29 +1,29 @@
 ---
 name: Trigger Builds
 
-on: 
+on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch to Checkout'
+      ref:
+        description: "Ref to Checkout"
         required: false
-        default: 'release'
+        default: "release"
       version:
-        description: 'EteBase Version'
+        description: "EteBase Version"
         required: false
-        default: 'master'
+        default: ""
       platforms:
-        description: 'Set the platforms to build [ linux/amd64, linux/arm64 or linux/arm/v7 ]'
+        description: "Set the platforms to build [ linux/amd64, linux/arm64 or linux/arm/v7 ]"
         required: false
-        default: 'linux/amd64,linux/arm64,linux/arm/v7'
+        default: "linux/amd64,linux/arm64,linux/arm/v7"
       pushit:
-        description: 'Should push?'
+        description: "Should push?"
         required: false
-        default: 'false'
-      only_edge:
-        description: 'Push only edge tag?'
-        required: false
-        default: 'true'
+        default: "false"
+      tag:
+        description: "Tag"
+        required: true
+        default: ""
 
 jobs:
   trigger-builds:
@@ -32,17 +32,27 @@ jobs:
       WORKFLOW: Build and Push
 
     steps:
+      - id: server_version
+        uses: ./.github/actions/get-server-version
+        with:
+          force: ${{ github.event.inputs.version }}
+
       - id: generate-inputs
         name: Cast value to JSON to preserve Boolean
         env:
-          JSON_INPUT: '"branch": "${{ github.event.inputs.branch }}", "version": "${{ github.event.inputs.version }}", "pushit": "${{ github.event.inputs.pushit }}", "only_edge": "${{ github.event.inputs.only_edge }}", "platforms": "${{ github.event.inputs.platforms }}"'
+          JSON_INPUT: >-
+            "ref": "${{ github.event.inputs.ref }}",
+            "pushit": "${{ github.event.inputs.pushit }}",
+            "tag": "${{ github.event.inputs.tag }}",
+            "version": "${{ steps.server_version.outputs.version }}",
+            "platforms": "${{ github.event.inputs.platforms }}"'
         shell: bash
         run: |
-          readonly JSON_START='${{ env.JSON_INPUT }}'         
+          readonly JSON_START='${{ env.JSON_INPUT }}'
 
-          base_inputs="{ ${JSON_START}, \"baseimg\": \"base\" }"
-          slim_inputs="{ ${JSON_START}, \"baseimg\": \"slim\" }"
-          alpine_inputs="{ ${JSON_START}, \"baseimg\": \"alpine\" }"
+          base_inputs="{ ${JSON_START}, \"flavor\": \"base\" }"
+          slim_inputs="{ ${JSON_START}, \"flavor\": \"slim\" }"
+          alpine_inputs="{ ${JSON_START}, \"flavor\": \"alpine\" }"
 
           echo ::set-output name=base_inputs::${base_inputs}
           echo ::set-output name=slim_inputs::${slim_inputs}
@@ -54,7 +64,6 @@ jobs:
           workflow: ${{ env.WORKFLOW }}
           token: ${{ secrets.PERSONAL_TOKEN }}
           inputs: ${{ steps.generate-inputs.outputs.base_inputs }}
-
 
       - name: Invoke workflow Build and Push for Slim tag
         uses: benc-uk/workflow-dispatch@v1
