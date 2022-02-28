@@ -1,0 +1,76 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base"
+    ],
+    "enabledManagers": [
+        "regex",
+        "dockerfile",
+        "github-actions"
+    ],
+    "excludeCommitPaths": [
+        "Dockerfile.template"
+    ],
+    "major": {
+        "dependencyDashboardApproval": true
+    },
+    "packageRules": [
+        {
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "python"
+            ],
+            "versioning": "pep440"
+        },
+        {
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "python"
+            ],
+            "matchUpdateTypes": [
+                "major",
+                "minor"
+            ],
+            "enabled": false
+        },
+        {
+            "matchDatasources": [
+                "docker"
+            ],
+            "groupName": "Docker Versions",
+            "groupSlug": "docker"
+        },
+        {
+            "matchDatasources": [
+                "github-actions"
+            ],
+            "groupName": "Github Actions Versions",
+            "groupSlug": "github-actions"
+        },
+        {
+            "matchDatasources": [
+                "regex"
+            ],
+            "groupName": "Etesync Server Versions",
+            "groupSlug": "server-version"
+        }
+    ],
+    "regexManagers": [
+        {
+            "fileMatch": [
+                "^server_version$"
+            ],
+            "matchStrings": [
+                "^export ETESYNC_VERSION=(?<currentValue>.*?)$"
+            ],
+            "depNameTemplate": "etesync/server",
+            "datasourceTemplate": "github-tags",
+            "versioningTemplate": "semver-coerced"
+        }
+    ],
+    "pinDigests": false
+}
