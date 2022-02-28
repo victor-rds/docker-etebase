@@ -1,5 +1,5 @@
 ---
-name: Trigger Builds
+name: Trigger Edge Builds
 
 on:
   push:
@@ -21,14 +21,19 @@ jobs:
       - id: generate-inputs
         name: Cast value to JSON to preserve Boolean
         env:
-          JSON_INPUT: '"branch": "release", "version": "master", "pushit": "true", "only_edge": "true", "platforms": "linux/amd64,linux/arm64,linux/arm/v7"'
+          JSON_INPUT: >-
+            "ref": "release",
+            "version": "master",
+            "pushit": "true",
+            "platforms": "linux/amd64,linux/arm64,linux/arm/v7",
+            "tag": "edge"
         shell: bash
         run: |
-          readonly JSON_START='${{ env.JSON_INPUT }}'         
+          readonly JSON_START='${{ env.JSON_INPUT }}'
 
-          base_inputs="{ ${JSON_START}, \"baseimg\": \"base\" }"
-          slim_inputs="{ ${JSON_START}, \"baseimg\": \"slim\" }"
-          alpine_inputs="{ ${JSON_START}, \"baseimg\": \"alpine\" }"
+          base_inputs="{ ${JSON_START}, \"flavor\": \"base\" }"
+          slim_inputs="{ ${JSON_START}, \"flavor\": \"slim\" }"
+          alpine_inputs="{ ${JSON_START}, \"flavor\": \"alpine\" }"
 
           echo ::set-output name=base_inputs::${base_inputs}
           echo ::set-output name=slim_inputs::${slim_inputs}

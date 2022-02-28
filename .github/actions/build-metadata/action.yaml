@@ -1,59 +1,76 @@
-name: 'Build Metadata'
-description: 'Build metada'
+name: "Build Metadata"
+description: "Build metada"
 
 inputs:
-  baseimg:
-    description: 'Base image'
-    required: false
+  flavor:
+    description: "Base image"
+    required: true
+    default: "base"
   version:
-    description: 'Version Override'
-    required: false
+    description: "Etebase Version"
+    default: "master"
+    required: true
 
 outputs:
-  source_name: 
-    description: "Source Name"
-    value: ${{ steps.get_git_data.outputs.source_name }}
-  source_branch: 
-    description: "Source Branch"
-    value: ${{ steps.get_git_data.outputs.source_branch }}
-  source_tag: 
-    description: "Source Tag"
-    value: ${{ steps.get_git_data.outputs.source_tag }}
-  suffix: 
+  source_name:
+    description: "Source Ref"
+    value: ${{ steps.prepare_metadata.outputs.source_ref }}
+  suffix:
     description: "Suffix for Docker Tags"
-    value: ${{ steps.get_git_data.outputs.suffix }}
-  version: 
-    description: "Version"
-    value: ${{ steps.get_git_data.outputs.version }}
-  ete_version: 
+    value: ${{ steps.prepare_metadata.outputs.suffix }}
+  base_version:
+    description: "Base Docker Image Version"
+    value: ${{ steps.prepare_metadata.outputs.base_version }}
+  dckr_version:
+    description: "Docker Image Version"
+    value: ${{ steps.prepare_metadata.outputs.dckr_version }}
+  ete_version:
     description: "Etebase Version"
-    value: ${{ steps.get_git_data.outputs.ete_version }}
+    value: ${{ steps.prepare_metadata.outputs.ete_version }}
+  semver:
+    description: "If version is a valid SEMVER"
+    value: ${{ steps.get_git_data.outputs.semver }}
 
 runs:
   using: "composite"
-  steps: 
-    - id: get_git_data
+  steps:
+    - id: prepare_metadata
       shell: bash
       env:
-        BASEIMG: ${{ inputs.baseimg }}
-        VERSION: ${{ inputs.version }}
+        FLAVOR: ${{ inputs.flavor }}
+        ETE_VERSION: ${{ inputs.version }}
       run: |
-        ETE_VERSION="master"
+        FLAVOR="${FLAVOR:-base}"
+        SEMVER='false'
         SUFFIX=""
-        VERSION="${VERSION:=${GITHUB_REF#refs/heads/}}"
-        BASEIMG="${BASEIMG// }"
+        VERSION=${ETE_VERSION#v}
+        SOURCE_REF="${GITHUB_REF_NAME}"
 
-        if [[ $VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
-          ETE_VERSION="v${VERSION}"
+        if [[ ${ETE_VERSION#v} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          SEMVER='true'
         fi
 
-        if [ ! -z "${BASEIMG}" ] && [ "${BASEIMG}" != "base" ]; then
-          SUFFIX="-${BASEIMG}"
+        if [ ! -z "${FLAVOR}" ] && [ "${FLAVOR}" != "base" ]; then
+          SUFFIX="-${FLAVOR}"
         fi
 
-        echo ::set-output name=source_name::${GITHUB_REF#refs/*/}
-        echo ::set-output name=source_branch::${GITHUB_REF#refs/heads/}
-        echo ::set-output name=source_tag::${GITHUB_REF#refs/tags/}
-        echo ::set-output name=version::${VERSION}
+        if [ "${GITHUB_REF_TYPE}" == 'branch' ] || [ "${GITHUB_REF_TYPE}" == 'tag' ]; then
+          VERSION="${VERSION}-${GITHUB_REF_NAME}"
+        else
+          declare CLEAR="${GITHUB_REF%/merge}"
+          CLEAR="${CLEAR#refs/*/}"
+
+          VERSION="${VERSION}-${CLEAR}"
+          SOURCE_REF="master-${CLEAR}"
+        fi
+
+        VERSION="${VERSION}${SUFFIX}"
+
+        BASE_VERSION=`grep "FROM python:" tags/${FLAVOR}/Dockerfile | cut -d ' ' -f 2`
+
+        echo ::set-output name=source_ref::${SOURCE_REF}
         echo ::set-output name=suffix::${SUFFIX}
+        echo ::set-output name=base_version::${BASE_VERSION}
+        echo ::set-output name=dckr_version::${VERSION}
         echo ::set-output name=ete_version::${ETE_VERSION}
+        echo ::set-output name=semver::${SEMVER}
