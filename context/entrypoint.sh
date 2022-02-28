@@ -167,12 +167,12 @@ check_perms() {
   else
     output_perms "${1}" "${2}"
   fi
-  dckr_info '------------------------------------------------' 
+  dckr_info '------------------------------------------------'
 }
 
 gen_inifile() {
   # shellcheck disable=SC2059
-  touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${ETEBASE_EASY_CONFIG_PATH}" )"
+  touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${ETEBASE_EASY_CONFIG_PATH}")"
 
   echo "[global]
 secret_file = ${SECRET_FILE}
