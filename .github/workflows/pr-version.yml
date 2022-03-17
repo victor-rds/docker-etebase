@@ -27,7 +27,7 @@ jobs:
       - id: dckr_pr_build_base
         if: always()
         name: PR Build Base Tag
-        uses: docker/build-push-action@v2.9.0
+        uses: docker/build-push-action@v2.10.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
@@ -39,7 +39,7 @@ jobs:
       - id: dckr_pr_build_slim
         if: always()
         name: PR Build Slim Tag
-        uses: docker/build-push-action@v2.9.0
+        uses: docker/build-push-action@v2.10.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
@@ -51,7 +51,7 @@ jobs:
       - id: dckr_pr_build_alpine
         if: always()
         name: PR Build Alpine Tag
-        uses: docker/build-push-action@v2.9.0
+        uses: docker/build-push-action@v2.10.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
