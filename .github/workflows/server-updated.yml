@@ -1,32 +1,15 @@
 ---
-name: Trigger Builds
+name: Trigger Stable Builds
 
 on:
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: "Ref to Checkout"
-        required: false
-        default: "release"
-      version:
-        description: "EteBase Version"
-        required: false
-        default: ""
-      platforms:
-        description: "Set the platforms to build [ linux/amd64, linux/arm64 or linux/arm/v7 ]"
-        required: false
-        default: "linux/amd64,linux/arm64,linux/arm/v7"
-      pushit:
-        description: "Should push?"
-        required: false
-        default: "false"
-      tag:
-        description: "Tag"
-        required: true
-        default: ""
+  push:
+    branches:
+      - release
+    paths:
+      - "server_version"
 
 jobs:
-  trigger-builds:
+  trigger-stable-builds:
     runs-on: ubuntu-latest
     env:
       WORKFLOW: Build and Push
@@ -39,18 +22,15 @@ jobs:
 
       - id: server_version
         uses: ./.github/actions/get-server-version
-        with:
-          force: ${{ github.event.inputs.version }}
 
       - id: generate-inputs
         name: Cast value to JSON to preserve Boolean
         env:
           JSON_INPUT: >-
-            "ref": "${{ github.event.inputs.ref }}",
-            "pushit": "${{ github.event.inputs.pushit }}",
-            "tag": "${{ github.event.inputs.tag }}",
+            "ref": "release",
+            "pushit": "true",
             "version": "${{ steps.server_version.outputs.version }}",
-            "platforms": "${{ github.event.inputs.platforms }}"
+            "platforms": "linux/amd64,linux/arm64,linux/arm/v7"
         shell: bash
         run: |
           readonly JSON_START='${{ env.JSON_INPUT }}'
