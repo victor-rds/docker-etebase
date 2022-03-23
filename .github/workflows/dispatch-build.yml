@@ -49,7 +49,7 @@ jobs:
         with:
           labels: |
             maintainer=victor-rds
-            version=${{ steps.build_metadata.outputs.dckr_version }}
+            version=${{ steps.build_metadata.outputs.label_version }}
             org.opencontainers.image.authors=Victor R. Santos <victor-rds@users.noreply.github.com>
             org.opencontainers.image.title=Docker Etebase Server
             org.opencontainers.image.base.name=${{ steps.build_metadata.outputs.base_version }}
@@ -63,8 +63,8 @@ jobs:
             type=edge,enable=${{ github.event.inputs.tag == 'edge' }},branch=${{ steps.build_metadata.outputs.source_name }}
             type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' && github.event.inputs.tag != 'edge' }}
             type=raw,value=${{ github.event.inputs.flavor }},suffix=,enable=${{ github.event.inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
-            type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ github.event.inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ github.event.inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
+            type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.tag_version }},enable=${{ github.event.inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.tag_version }},enable=${{ github.event.inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
 
       - name: Set up QEMU
         if: contains(github.event.inputs.platforms, 'linux/arm')
