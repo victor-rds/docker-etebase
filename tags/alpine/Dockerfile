@@ -25,12 +25,12 @@ WORKDIR ${BASE_DIR}
 RUN set -eux; \
     # Prepare packages required by the base image
     apk add --no-cache openssl mailcap libpq libffi bash; \
-    apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev openssl-dev postgresql-dev wget cargo; \
+    apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev openssl-dev postgresql-dev wget; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
-    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" uwsgi 'uvicorn[standard]'; \
+    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt"; \
     # Remove packages no longer required by the base image
     apk del .build-deps; \
     # Clear Downloads and set permissions

@@ -25,14 +25,15 @@ WORKDIR ${BASE_DIR}
 # hadolint ignore=DL3008,DL3018
 RUN set -eux; \
     # Prepare packages required by the base image
-    export BUILD_DEPS='cargo'; \
+    #export BUILD_DEPS='cargo'; \
     apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi7 libpq5 libssl1.1 "${BUILD_DEPS}"; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi7 libpq5 libssl1.1; \
+    #"${BUILD_DEPS}"; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
-    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" uwsgi 'uvicorn[standard]'; \
+    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt"; \
     # Remove packages no longer required by the base image
     apt-get remove --purge -y "${BUILD_DEPS}"; \
     apt-get autoremove --purge -y; \
