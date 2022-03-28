@@ -35,7 +35,7 @@ RUN set -eux; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt"; \
     # Remove packages no longer required by the base image
-    apt-get remove --purge -y "${BUILD_DEPS}"; \
+    # apt-get remove --purge -y "${BUILD_DEPS}"; \
     apt-get autoremove --purge -y; \
     rm -rf /var/lib/apt/lists/*; \
     # Clear Downloads and set permissions
