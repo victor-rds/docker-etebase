@@ -6,7 +6,6 @@ on:
     branches:
       - master
     paths:
-      - "context/**"
       - "tags/slim/Dockerfile"
       - ".github/workflows/pr_slim.yml"
 
