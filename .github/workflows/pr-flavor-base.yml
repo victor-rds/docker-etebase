@@ -1,0 +1,16 @@
+---
+name: Test Pull Request on the Debian Image
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "tags/base/Dockerfile"
+      - ".github/workflows/pr_base.yml"
+
+jobs:
+  pr-dckr-base:
+    uses: ./.github/workflows/call_pr_check_build.yml
+    with:
+      flavor: "base"

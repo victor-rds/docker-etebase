@@ -1,26 +1,28 @@
 ---
-name: Test Pull Request of a new Etesync Server Version
+name: Test Pull Request changes to Context
 
 on:
   pull_request:
     branches:
       - master
     paths:
-      - "server_version"
+      - "context/**"
 
 jobs:
-  pr-version-base:
+  pr-context-base:
     uses: ./.github/workflows/call_pr_check_build.yml
     with:
       flavor: "base"
+      version: "master"
 
-  pr-version-slim:
+  pr-context-slim:
     uses: ./.github/workflows/call_pr_check_build.yml
     with:
       flavor: "slim"
+      version: "master"
 
-  pr-version-alpine:
+  pr-context-alpine:
     uses: ./.github/workflows/call_pr_check_build.yml
     with:
       flavor: "alpine"
-
+      version: "master"

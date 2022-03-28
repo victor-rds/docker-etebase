@@ -1,0 +1,16 @@
+---
+name: Test Pull Request on the Alpine Image
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "tags/alpine/Dockerfile"
+      - ".github/workflows/pr_alpine.yml"
+
+jobs:
+  pr-dckr-alpine:
+    uses: ./.github/workflows/call_pr_check_build.yml
+    with:
+      flavor: "alpine"

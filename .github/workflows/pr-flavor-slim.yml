@@ -1,0 +1,17 @@
+---
+name: Test Pull Request on the Debian Slim Image
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "tags/slim/Dockerfile"
+      - ".github/workflows/pr_slim.yml"
+
+jobs:
+  pr-flavor-slim:
+    uses: ./.github/workflows/call_pr_check_build.yml
+    with:
+      flavor: "slim"
+
