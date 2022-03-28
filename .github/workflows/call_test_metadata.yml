@@ -1,0 +1,100 @@
+---
+name: Call Metadata Actions for Dispatch Build
+
+on:
+  workflow_call:
+    inputs:
+      flavor:
+        description: "Set the base image [base, slim or alpine]"
+        default: "base"
+        required: false
+        type: string
+      version:
+        description: "EteBase Version"
+        required: false
+        type: string
+      platforms:
+        description: "Set the platforms to build [ linux/amd64, linux/arm64 or linux/arm/v7 ]"
+        default: "linux/amd64,linux/arm64,linux/arm/v7"
+        required: false
+        type: string
+      tag:
+        description: "Tag"
+        required: false
+        type: string
+      pushit:
+        description: "Should push?"
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  test-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Dockerfiles and Context
+        uses: actions/checkout@v3
+
+      - id: server_version
+        uses: ./.github/actions/get-server-version
+        with:
+          force: ${{ inputs.version }}
+
+      - id: build_metadata
+        name: Prepare Project Metadata
+        uses: ./.github/actions/build-metadata
+        with:
+          flavor: ${{ inputs.flavor }}
+          version: ${{ steps.server_version.outputs.version }}
+
+      - id: docker_metadata
+        name: Prepare Docker Metadata
+        uses: docker/metadata-action@v3.6.2
+        with:
+          labels: |
+            maintainer=victor-rds
+            version=${{ steps.build_metadata.outputs.label_version }}
+            org.opencontainers.image.authors=Victor R. Santos <victor-rds@users.noreply.github.com>
+            org.opencontainers.image.title=Docker Etebase Server
+            org.opencontainers.image.base.name=${{ steps.build_metadata.outputs.base_version }}
+          images: |
+            victorrds/etebase
+            victorrds/etesync
+          flavor: |
+            latest=${{ ( inputs.flavor == 'base' && steps.build_metadata.outputs.semver == 'true' ) }}
+            suffix=${{ steps.build_metadata.outputs.suffix }}
+          tags: |
+            type=edge,enable=${{ inputs.tag == 'edge' }},branch=${{ steps.build_metadata.outputs.source_name }}
+            type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' && inputs.tag != 'edge' }}
+            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ steps.build_metadata.outputs.semver == 'true' }}
+            type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
+
+      - name: Cast value to JSON to preserve Boolean
+        shell: bash
+        run: |
+          echo -e '########## inputs ##########\n'
+
+          echo -e "flavor: ${{ inputs.flavor }}\n"
+
+          echo -e "version: ${{ inputs.version }}\n"
+
+          echo -e "platforms: ${{ inputs.platforms }}\n"
+
+          echo -e "tag: ${{ inputs.tag }}\n"
+
+          echo -e "pushit: ${{ inputs.pushit }}\n"
+
+          echo -e '########## build_metadata ##########\n'
+
+          echo -e "source_name: ${{ steps.build_metadata.outputs.source_name }}\n"
+
+          echo -e "suffix: ${{ steps.build_metadata.outputs.suffix }}\n"
+
+          echo -e "base_version: ${{ steps.build_metadata.outputs.base_version }}\n"
+
+          echo -e "label_version: ${{ steps.build_metadata.outputs.label_version }}\n"
+
+          echo -e "ete_version: ${{ steps.build_metadata.outputs.ete_version }}\n"
+
+          echo -e "semver: ${{ steps.build_metadata.outputs.semver }}\n"
