@@ -23,16 +23,13 @@ outputs:
     value: ${{ steps.prepare_metadata.outputs.base_version }}
   label_version:
     description: "Docker Image Version"
-    value: ${{ steps.prepare_metadata.outputs.dckr_version }}
+    value: ${{ steps.prepare_metadata.outputs.label_version }}
   ete_version:
     description: "Etebase Version"
     value: ${{ steps.prepare_metadata.outputs.ete_version }}
-  tag_version:
-    description: "Tag Version"
-    value: ${{ steps.prepare_metadata.outputs.ete_version }}
   semver:
     description: "If version is a valid SEMVER"
-    value: ${{ steps.get_git_data.outputs.semver }}
+    value: ${{ steps.prepare_metadata.outputs.semver }}
 
 runs:
   using: "composite"
@@ -47,6 +44,7 @@ runs:
         SEMVER='false'
         SUFFIX=""
         VERSION=${ETE_VERSION#v}
+
         SOURCE_REF="${GITHUB_REF_NAME}"
 
         if [[ ${ETE_VERSION#v} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -76,5 +74,4 @@ runs:
         echo ::set-output name=base_version::${BASE_VERSION}
         echo ::set-output name=label_version::${VERSION}
         echo ::set-output name=ete_version::${ETE_VERSION}
-        echo ::set-output name=tag_version::${ETE_VERSION#v}
         echo ::set-output name=semver::${SEMVER}
