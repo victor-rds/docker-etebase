@@ -27,6 +27,11 @@ on:
         default: false
         required: false
         type: boolean
+    secrets:
+      dckr_username:
+        required: true
+      dckr_token:
+        required: true
 
 jobs:
   build-n-push:
@@ -83,8 +88,8 @@ jobs:
         if: inputs.pushit
         uses: docker/login-action@v1.14.1
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          username: ${{ secrets.dckr_username }}
+          password: ${{ secrets.dckr_token }}
 
       - name: Docker Build and Push
         id: docker_build_push
