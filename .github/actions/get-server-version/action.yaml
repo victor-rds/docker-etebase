@@ -19,10 +19,12 @@ runs:
       env:
         OVERRIDE: ${{ inputs.force }}
       run: |
-        source server_version
+        source ./server_version
 
         if [ ! -z "${OVERRIDE}" ]; then
           ETESYNC_VERSION="${OVERRIDE}"
         fi
+
+        echo ${ETESYNC_VERSION}
 
         echo ::set-output name=version::${ETESYNC_VERSION}
