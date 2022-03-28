@@ -1,5 +1,5 @@
 ---
-name: Call Metadata Actions for Dispatch Build
+name: Call Build and Push
 
 on:
   workflow_call:
@@ -29,13 +29,14 @@ on:
         type: boolean
 
 jobs:
-  test-data:
+  build-n-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v3
 
       - id: server_version
+        name: Get Server Version
         uses: ./.github/actions/get-server-version
         with:
           force: ${{ inputs.version }}
@@ -70,31 +71,30 @@ jobs:
             type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
 
-      - name: Metadata Output
-        shell: bash
-        run: |
-          echo -e '########## inputs ##########\n'
+      - name: Set up QEMU
+        if: contains(inputs.platforms, 'linux/arm')
+        uses: docker/setup-qemu-action@v1.2.0
 
-          echo -e "flavor: ${{ inputs.flavor }}\n"
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1.6.0
 
-          echo -e "version: ${{ inputs.version }}\n"
+      - name: Login to DockerHub
+        if: inputs.pushit
+        uses: docker/login-action@v1.14.1
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-          echo -e "platforms: ${{ inputs.platforms }}\n"
-
-          echo -e "tag: ${{ inputs.tag }}\n"
-
-          echo -e "pushit: ${{ inputs.pushit }}\n"
-
-          echo -e '########## build_metadata ##########\n'
-
-          echo -e "source_name: ${{ steps.build_metadata.outputs.source_name }}\n"
-
-          echo -e "suffix: ${{ steps.build_metadata.outputs.suffix }}\n"
-
-          echo -e "base_version: ${{ steps.build_metadata.outputs.base_version }}\n"
-
-          echo -e "label_version: ${{ steps.build_metadata.outputs.label_version }}\n"
-
-          echo -e "ete_version: ${{ steps.build_metadata.outputs.ete_version }}\n"
-
-          echo -e "semver: ${{ steps.build_metadata.outputs.semver }}\n"
+      - name: Docker Build and Push
+        id: docker_build_push
+        uses: docker/build-push-action@v2.10.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          platforms: ${{ inputs.platforms }}
+          context: .
+          file: ./tags/${{ inputs.flavor }}/Dockerfile
+          build-args: ETE_VERSION=${{ steps.build_metadata.outputs.ete_version }}
+          tags: ${{ steps.docker_metadata.outputs.tags }}
+          labels: ${{ steps.docker_metadata.outputs.labels }}
+          push: ${{ inputs.pushit }}
