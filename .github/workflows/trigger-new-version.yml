@@ -1,0 +1,28 @@
+---
+name: Trigger Build New Versions
+
+on:
+  push:
+    branches:
+      - release
+    paths:
+      - "server_version"
+
+jobs:
+  base-new-version:
+    uses: ./.github/workflows/call_build_push.yml
+    with:
+      flavor: "base"
+      pushit: true
+
+  slim-new-version:
+    uses: ./.github/workflows/call_build_push.yml
+    with:
+      flavor: "slim"
+      pushit: true
+
+  alpine-new-version:
+    uses: ./.github/workflows/call_build_push.yml
+    with:
+      flavor: "alpine"
+      pushit: true
