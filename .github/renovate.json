@@ -19,28 +19,6 @@
             "matchDatasources": [
                 "docker"
             ],
-            "matchPackageNames": [
-                "python"
-            ],
-            "versioning": "pep440"
-        },
-        {
-            "matchDatasources": [
-                "docker"
-            ],
-            "matchPackageNames": [
-                "python"
-            ],
-            "matchUpdateTypes": [
-                "major",
-                "minor"
-            ],
-            "enabled": false
-        },
-        {
-            "matchDatasources": [
-                "docker"
-            ],
             "groupName": "Docker Versions",
             "groupSlug": "docker"
         },
