@@ -15,7 +15,7 @@ readonly C_UID
 readonly C_GID
 
 declare -r MANAGE="$BASE_DIR/manage.py"
-declare -r ERROR_PERM_TEMPLATE="%s : Permission Denied. Please check the volume permissions or the user runnning the container."
+declare -r ERROR_PERM_TEMPLATE="%s : Permission Denied. Please check the volume permissions or the user (%s:%s) running the container."
 declare -r ERROR_DB_TEMPLATE='Failed do access %s database. Please check the database connection or file permission.'
 
 # logging functions
@@ -172,7 +172,7 @@ check_perms() {
 
 gen_inifile() {
   # shellcheck disable=SC2059
-  touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${ETEBASE_EASY_CONFIG_PATH}")"
+  touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${ETEBASE_EASY_CONFIG_PATH}" "${C_UID}" "${C_GID}")"
 
   echo "[global]
 secret_file = ${SECRET_FILE}
