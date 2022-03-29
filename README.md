@@ -122,9 +122,9 @@ Currently, this is only supported for DB_ENGINE, DATABASE_NAME, DATABASE_USER, D
 
 ## Ports
 
-This image exposes the **3735/TCP** Port
+This image exposes the **3735/TCP** port
 
-## Qustion & Issues
+## Questions & Issues
 
 For questions please use [Discussions](https://github.com/victor-rds/docker-etebase/discussions).
 Any bugs please report to the repository [Issue Tracker](https://github.com/victor-rds/docker-etebase/issues)
