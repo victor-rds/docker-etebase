@@ -71,27 +71,26 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
 
 - **SERVER**: Defines how the container will serve the application, the options are:
   - `uvicorn` start using [uvicorn](https://www.uvicorn.org/) a ASGI server implementation with HTTP/1.1 and WebSockets support, this runs without SSL and must be used with a reverse-proxy/web server, such as _nginx_, _traefik_ and others.
-  Aliases: `http`, `http-socket` `asgi`
-  - `uvicorn-https` same as above but with SSL/TLS support enabled, certificates must be mounted in the container, see: . Alias: `https`
-  - Older versions had support to `uwsgi`, `daphne` and `Django-server`, but that's no longer supported see [#103](https://github.com/victor-rds/docker-etebase/issues/103)
-
-- **DEBUG**: Verbose mode provides additional messages from the `/entrypoint.sh`, this does not change the output of the etebase server.
-- **SHELL_DEBUG**: Runs the `/entrypoint.sh` with `set -x` for debug purposes.
-- **AUTO_UPDATE**: Trigger database update/migration every time the container starts, default: `false`, more details below.
+  Aliases: `http`, `http-socket` `asgi`;
+  - `uvicorn-https` same as above but with SSL/TLS support enabled, certificates must be mounted in the container, see: . Alias: `https`;
+  - Older versions had support to `uwsgi`, `daphne` and `Django-server`, but that's no longer supported see [#103](https://github.com/victor-rds/docker-etebase/issues/103);
+- **DEBUG**: Verbose mode provides additional messages from the `/entrypoint.sh`, this does not change the output of the etebase server;
+- **SHELL_DEBUG**: Runs the `/entrypoint.sh` with `set -x` for debug purposes;
+- **AUTO_UPDATE**: Trigger database update/migration every time the container starts, default: `false`, more details below;
 - **SUPER_USER**: Username of the Django superuser (only used if no previous database is found);
   - **SUPER_PASS**: Password of the Django superuser (optional, one will be generated if not set);
   - **SUPER_EMAIL**: Email of the Django superuser (optional);
 
 #### Related to the etebase-server.ini settings file
 
-- **ETEBASE_EASY_CONFIG_PATH** set the configuration file location, default: `/data/etebase-server.ini`
-- **MEDIA_ROOT**²: the path where user data is stored [:warning:](https://github.com/etesync/server#data-locations-and-backups), default: `/data/media`
+- **ETEBASE_EASY_CONFIG_PATH** set the configuration file location, default: `/data/etebase-server.ini`;
+- **MEDIA_ROOT**²: the path where user data is stored [:warning:](https://github.com/etesync/server#data-locations-and-backups), default: `/data/media`;
 - **DB_ENGINE**: Database engine currently only accepts `sqlite` (default) and `postgres`;
 - **ALLOWED_HOSTS**²: the ALLOWED_HOSTS settings, must be a valid domain or `*`. default: * (not recommended for production);
-- **SECRET_FILE**²: Defines file that contains the value for Django's SECRET_KEY, if not found a new one is generated. default: `/data/secret.txt`.
+- **SECRET_FILE**²: Defines file that contains the value for Django's SECRET_KEY, if not found a new one is generated. default: `/data/secret.txt`;
 - **LANGUAGE_CODE**: Django language code, default: `en-us`;
 - **TIME_ZONE**: time zone, defaults to `UTC`, must be a valid ´tz database name´, valid names can be found at <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones>;
-- **DEBUG_DJANGO**²: enables Django Debug mode, not recommended for production defaults to `false`
+- **DEBUG_DJANGO**²: enables Django Debug mode, not recommended for production defaults to `false`.
 
 **²** for more details please take look at the [Etebase Server README.md](https://github.com/etesync/server#configuration)
 
