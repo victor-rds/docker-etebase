@@ -241,6 +241,14 @@ create_superuser() {
   fi
 }
 
+set_auto_signup() {
+  if [ "${AUTO_SIGNUP}" = "true" ]; then
+    sed -e '/ETEBASE_CREATE_USER_FUNC/s/^#*/#/g' -i "${BASE_DIR}/etebase_server/settings.py"
+  elif [ "${AUTO_SIGNUP}" = "false" ]; then
+    sed '/ETEBASE_CREATE_USER_FUNC/s/^#//g' -i "${BASE_DIR}/etebase_server/settings.py"
+  fi
+}
+
 check_db() {
 
   $MANAGE migrate --plan 2>/tmp/db_error | grep 'django_etebase.0001_initial' >/dev/null
@@ -272,6 +280,8 @@ fi
 if [ ! -e "${ETEBASE_EASY_CONFIG_PATH}" ] || [ -n "${REGEN_INI}" ]; then
   gen_inifile
 fi
+
+set_auto_signup
 
 check_db
 

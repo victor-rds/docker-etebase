@@ -88,6 +88,7 @@ The available Etebase settings are set in the `/data/etebase-server.ini` file, i
 - **DB_ENGINE**: Database engine currently only accepts `sqlite` (default) and `postgres`;
 - **ALLOWED_HOSTS**²: the ALLOWED_HOSTS settings, must be a valid domain or `*`. default: * (not recommended for production);
 - **SECRET_FILE**²: Defines file that contains the value for Django's SECRET_KEY, if not found a new one is generated. default: `/data/secret.txt`;
+- **AUTO_SIGNUP**: Enable automatic signup, default: `false`;
 - **LANGUAGE_CODE**: Django language code, default: `en-us`;
 - **TIME_ZONE**: time zone, defaults to `UTC`, must be a valid ´tz database name´, valid names can be found at <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones>;
 - **DEBUG_DJANGO**²: enables Django Debug mode, not recommended for production defaults to `false`.
