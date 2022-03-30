@@ -32,7 +32,7 @@ RUN set -eux; \
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
-    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt"; \
+    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" "psycopg2-binary"; \
     # Remove packages no longer required by the base image
     apt-get remove --purge -y ${BUILD_DEPS}; \
     apt-get autoremove --purge -y; \
