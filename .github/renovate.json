@@ -16,21 +16,21 @@
     },
     "packageRules": [
         {
-            "matchDatasources": [
-                "docker"
+            "matchManagers": [
+                "dockerfile"
             ],
             "groupName": "Docker Versions",
             "groupSlug": "docker"
         },
         {
-            "matchDatasources": [
+            "matchManagers": [
                 "github-actions"
             ],
             "groupName": "Github Actions Versions",
             "groupSlug": "github-actions"
         },
         {
-            "matchDatasources": [
+            "matchManagers": [
                 "regex"
             ],
             "groupName": "Etesync Server Versions",
