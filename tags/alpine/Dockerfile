@@ -1,4 +1,4 @@
-FROM python:3.10.4-alpine
+FROM python:3.10.5-alpine
 LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
 ARG DEFAULT_UID=373
