@@ -4,7 +4,7 @@ LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 ARG DEFAULT_UID=373
 ARG DEFAULT_GID=373
 ARG ETE_VERSION=master
-ARG ETE_URL="https://github.com/etesync/server/archive/${ETE_VERSION}.tar.gz"
+ARG ETE_REPO="https://github.com/etesync/server.git"
 
 ENV BASE_DIR /etebase
 
@@ -26,18 +26,17 @@ RUN set -eux; \
     # Prepare packages required by the base image
     apk add --no-cache openssl mailcap libpq libffi libldap libsasl bash; \
     apk add --no-cache --virtual .build-deps coreutils gcc make wget linux-headers \
-        cyrus-sasl-dev libc-dev libffi-dev openssl-dev postgresql-dev openldap-dev ; \
+        cyrus-sasl-dev libc-dev libffi-dev openssl-dev postgresql-dev openldap-dev git; \
     # Fix Python LDAP build
     echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so; \
     # Download Etebase and install dependencies
-    wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
-    tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
+    git clone --depth=1 --branch=${ETE_VERSION} "${ETE_REPO}" "${BASE_DIR}"; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" "psycopg2-binary" "python-ldap"; \
     # Remove packages no longer required by the base image
     apk del .build-deps; \
     # Clear Downloads and set permissions
-    rm -r /tmp/etebase.tar.gz; \
+    rm -r "${BASE_DIR}/.git"; \
     chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${BASE_DIR}"
 
 # Etebase directories and user setup 

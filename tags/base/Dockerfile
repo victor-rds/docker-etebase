@@ -5,7 +5,7 @@ LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 ARG DEFAULT_UID=373
 ARG DEFAULT_GID=373
 ARG ETE_VERSION=master
-ARG ETE_URL="https://github.com/etesync/server/archive/${ETE_VERSION}.tar.gz"
+ARG ETE_REPO="https://github.com/etesync/server.git"
 
 ENV BASE_DIR /etebase
 
@@ -30,8 +30,7 @@ RUN set -eux; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support \
         libffi7 libpq5 libssl1.1 libldap-2.4-2 libsasl2-2 ${BUILD_DEPS}; \
     # Download Etebase and install dependencies
-    wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
-    tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
+    git clone --depth=1 --branch=${ETE_VERSION} "${ETE_REPO}" "${BASE_DIR}"; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
     pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" "psycopg2-binary" "python-ldap"; \
     # Remove packages no longer required by the base image
@@ -39,7 +38,7 @@ RUN set -eux; \
     apt-get autoremove --purge -y; \
     rm -rf /var/lib/apt/lists/*; \
     # Clear Downloads and set permissions
-    rm -r /tmp/etebase.tar.gz; \
+    rm -r "${BASE_DIR}/.git"; \
     chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${BASE_DIR}"
 
 # Etebase directories and user setup 
