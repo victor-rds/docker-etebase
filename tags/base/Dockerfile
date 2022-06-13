@@ -39,7 +39,7 @@ RUN set -eux; \
     apt-get autoremove --purge -y; \
     rm -rf /var/lib/apt/lists/*; \
     # Clear Downloads and set permissions
-    rm -r /tmp/etebase.tar.gz "${BASE_DIR}/example-configs" "${BASE_DIR}/etebase-server.ini.example"; \
+    rm -r /tmp/etebase.tar.gz; \
     chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${BASE_DIR}"
 
 # Etebase directories and user setup 

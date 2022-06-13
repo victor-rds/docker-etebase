@@ -35,7 +35,7 @@ RUN set -eux; \
     # Remove packages no longer required by the base image
     #%%_CLEAN_OS_%%
     # Clear Downloads and set permissions
-    rm -r /tmp/etebase.tar.gz "${BASE_DIR}/example-configs" "${BASE_DIR}/etebase-server.ini.example"; \
+    rm -r /tmp/etebase.tar.gz; \
     chown -R "${DEFAULT_UID}":"${DEFAULT_GID}" "${BASE_DIR}"
 
 # Etebase directories and user setup 
