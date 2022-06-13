@@ -22,20 +22,20 @@ ENV PORT 3735
 WORKDIR ${BASE_DIR}
 
 # OS packages and deps installation
-# hadolint ignore=DL3008,DL3018
+# hadolint ignore=DL3008,DL3018,SC2086
 RUN set -eux; \
     # Prepare packages required by the base image
-    #export BUILD_DEPS='cargo'; \
+    export BUILD_DEPS='libldap2-dev libsasl2-dev'; \
     apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi7 libpq5 libssl1.1; \
-    #"${BUILD_DEPS}"; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support \
+        libffi7 libpq5 libssl1.1 libldap-2.4-2 libsasl2-2 ${BUILD_DEPS}; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
-    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" "psycopg2-binary"; \
+    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" "psycopg2-binary" "python-ldap"; \
     # Remove packages no longer required by the base image
-    # apt-get remove --purge -y "${BUILD_DEPS}"; \
+    apt-get remove --purge -y ${BUILD_DEPS}; \
     apt-get autoremove --purge -y; \
     rm -rf /var/lib/apt/lists/*; \
     # Clear Downloads and set permissions

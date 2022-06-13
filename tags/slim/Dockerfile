@@ -25,9 +25,10 @@ WORKDIR ${BASE_DIR}
 # hadolint ignore=DL3008,DL3018,SC2086
 RUN set -eux; \
     # Prepare packages required by the base image
-    export BUILD_DEPS='build-essential libffi-dev libpq-dev libssl-dev wget'; \
+    export BUILD_DEPS='build-essential libffi-dev libpq-dev libssl-dev libldap2-dev libsasl2-dev wget'; \
     apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support libffi7 libpq5 libssl1.1 ${BUILD_DEPS}; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support \
+        libffi7 libpq5 libssl1.1 libldap-2.4-2 libsasl2-2 ${BUILD_DEPS}; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \

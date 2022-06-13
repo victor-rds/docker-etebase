@@ -24,13 +24,16 @@ WORKDIR ${BASE_DIR}
 # hadolint ignore=DL3008,DL3018
 RUN set -eux; \
     # Prepare packages required by the base image
-    apk add --no-cache openssl mailcap libpq libffi bash; \
-    apk add --no-cache --virtual .build-deps coreutils gcc make libffi-dev linux-headers libc-dev openssl-dev postgresql-dev wget; \
+    apk add --no-cache openssl mailcap libpq libffi libldap libsasl bash; \
+    apk add --no-cache --virtual .build-deps coreutils gcc make wget linux-headers \
+        cyrus-sasl-dev libc-dev libffi-dev openssl-dev postgresql-dev openldap-dev ; \
+    # Fix Python LDAP build
+    echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so; \
     # Download Etebase and install dependencies
     wget -nv --no-hsts -O /tmp/etebase.tar.gz "${ETE_URL}"; \
     tar --strip-components=1 -vzxf /tmp/etebase.tar.gz; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
-    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" "psycopg2-binary"; \
+    pip install --no-cache-dir --progress-bar off -r "${BASE_DIR}/requirements.txt" "psycopg2-binary" "python-ldap"; \
     # Remove packages no longer required by the base image
     apk del .build-deps; \
     # Clear Downloads and set permissions
