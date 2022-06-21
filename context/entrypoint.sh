@@ -237,7 +237,7 @@ create_superuser() {
 ----------------------------------------------------"
     fi
 
-    echo "from myauth.models import User; User.objects.create_superuser('${SUPER_USER}' , None, '${SUPER_PASS}')" | python manage.py shell
+    echo "from etebase_server.myauth.models import User; User.objects.create_superuser('${SUPER_USER}' , None, '${SUPER_PASS}')" | python manage.py shell
   fi
 }
 
