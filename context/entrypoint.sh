@@ -87,6 +87,7 @@ init_env() {
 
   file_env 'DB_ENGINE' 'sqlite'
   file_env 'DATABASE_NAME'
+  file_env 'REDIS_URI'
 
   if [ "${DB_ENGINE}" = "sqlite" ]; then
     local _DB_FILENAME
@@ -183,10 +184,16 @@ media_root = ${MEDIA_ROOT}
 media_url =  /user-media/
 language_code = ${LANGUAGE_CODE}
 time_zone = ${TIME_ZONE}
-
-[allowed_hosts]
-allowed_host1 = ${ALLOWED_HOSTS}
 " >"${ETEBASE_EASY_CONFIG_PATH}"
+
+  if [ -z "${REDIS_URI}" ]; then
+    echo "redis_uri = ${REDIS_URI}
+" >>"${ETEBASE_EASY_CONFIG_PATH}"
+  fi
+
+  echo "[allowed_hosts]
+allowed_host1 = ${ALLOWED_HOSTS}
+" >>"${ETEBASE_EASY_CONFIG_PATH}"
 
   if [ "${DB_ENGINE}" = "postgres" ]; then
     file_env 'DATABASE_USER' "${DATABASE_NAME}"
