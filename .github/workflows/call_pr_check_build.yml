@@ -32,7 +32,7 @@ jobs:
 
       - name: PR Build
         id: docker_pr_build
-        uses: docker/build-push-action@v3.0.0
+        uses: docker/build-push-action@v3.1.1
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
