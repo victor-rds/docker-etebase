@@ -1,4 +1,4 @@
-FROM python:3.10.5
+FROM python:3.10.6
 
 LABEL maintainer="Victor R. Santos <victor-rds@users.noreply.github.com>"
 
