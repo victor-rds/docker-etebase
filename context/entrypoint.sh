@@ -186,7 +186,7 @@ language_code = ${LANGUAGE_CODE}
 time_zone = ${TIME_ZONE}
 " >"${ETEBASE_EASY_CONFIG_PATH}"
 
-  if [ -z "${REDIS_URI}" ]; then
+  if [ -n "${REDIS_URI}" ]; then
     echo "redis_uri = ${REDIS_URI}
 " >>"${ETEBASE_EASY_CONFIG_PATH}"
   fi
