@@ -172,43 +172,44 @@ check_perms() {
 gen_inifile() {
 	touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "${ETEBASE_EASY_CONFIG_PATH} : Permission Denied. Please check the volume permissions or the user (${C_UID}:${C_GID}) running the container."
 
-	echo "[global]
-secret_file = ${SECRET_FILE}
-debug = ${DEBUG_DJANGO}
-static_root = ${STATIC_ROOT}
-static_url = /static/
-media_root = ${MEDIA_ROOT}
-media_url =  /user-media/
-language_code = ${LANGUAGE_CODE}
-time_zone = ${TIME_ZONE}
-" >"${ETEBASE_EASY_CONFIG_PATH}"
+	local DB_BACKEND
 
-	if [ -n "${REDIS_URI}" ]; then
-		echo "redis_uri = ${REDIS_URI}
-" >>"${ETEBASE_EASY_CONFIG_PATH}"
+	if [ "${DB_ENGINE}" = "postgres" ]; then
+		DB_BACKEND="django.db.backends.postgresql"
+	else
+	    DB_BACKEND="django.db.backends.sqlite3"
 	fi
 
-	echo "[allowed_hosts]
-allowed_host1 = ${ALLOWED_HOSTS}
-" >>"${ETEBASE_EASY_CONFIG_PATH}"
+	cat <<- EOF > "${ETEBASE_EASY_CONFIG_PATH}"
+	[global]
+	secret_file = ${SECRET_FILE}
+	debug = ${DEBUG_DJANGO}
+	static_root = ${STATIC_ROOT}
+	static_url = /static/
+	media_root = ${MEDIA_ROOT}
+	media_url =  /user-media/
+	language_code = ${LANGUAGE_CODE}
+	time_zone = ${TIME_ZONE}
+	${REDIS_URI:+redis_uri = ${REDIS_URI}}
+
+	[allowed_hosts]
+	allowed_host1 = ${ALLOWED_HOSTS}
+
+	[database]
+	engine = ${DB_BACKEND}
+	name = ${DATABASE_NAME}
+	EOF
 
 	if [ "${DB_ENGINE}" = "postgres" ]; then
 		file_env 'DATABASE_USER' "${DATABASE_NAME}"
 		file_env 'DATABASE_PASSWORD' "${DATABASE_USER}"
 
-		echo "[database]
-engine = django.db.backends.postgresql
-name = ${DATABASE_NAME}
-user = ${DATABASE_USER}
-password = ${DATABASE_PASSWORD}
-host = ${DATABASE_HOST:=database}
-port = ${DATABASE_PORT:=5432}
-" >>"${ETEBASE_EASY_CONFIG_PATH}"
-	else
-		echo "[database]
-engine = django.db.backends.sqlite3
-name = ${DATABASE_NAME}
-" >>"${ETEBASE_EASY_CONFIG_PATH}"
+		cat <<- EOF >> "${ETEBASE_EASY_CONFIG_PATH}"
+		user = ${DATABASE_USER}
+		password = ${DATABASE_PASSWORD}
+		host = ${DATABASE_HOST:=database}
+		port = ${DATABASE_PORT:=5432}
+		EOF
 	fi
 
 	dckr_info "Generated ${ETEBASE_EASY_CONFIG_PATH}"
