@@ -108,6 +108,15 @@ If **DB_ENGINE** is set to **`postgres`** the following variables can be used, (
 - **DATABASE_HOST**: `database`
 - **DATABASE_PORT**: `5432`
 
+For LDAP integration use the following variables, this is advanced usage please refer to the [etesync/server@fac36aa](https://github.com/etesync/server/commit/fac36aae1186201fdc5ae4874065a3528626ef68) commit on how to use and more details:
+
+- **LDAP_SERVER**: The URL to LDAP server;
+- **LDAP_BINDDN**: LDAP "user" to bind as. Must be a bind user;
+- **LDAP_BIND_PW**: The password to authenticate as your bind user;
+- **LDAP_FILTER**: LDAP filter query ('%%s' will be substituted for the username);
+- **LDAP_SEARCH_BASE**: Search base;
+- **LDAP_CACHE_TTL**: In case a cache TTL of 1 hour is too short for you, set `cache_ttl` to the preferred amount of hours a cache entry should be viewed as valid (optional);
+
 ### Docker Secrets
 
 As an alternative to passing sensitive information via environment variables, _FILE may be appended to some of the previously listed environment variables, causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Docker secrets stored in /run/secrets/<secret_name> files. For example:

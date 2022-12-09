@@ -212,6 +212,20 @@ gen_inifile() {
 		EOF
 	fi
 
+	if [ -n "${LDAP_SERVER}" ]; then
+		file_env 'LDAP_BIND_PW'
+
+		cat <<- EOF >> "${ETEBASE_EASY_CONFIG_PATH}"
+		[ldap]
+		server = ${LDAP_SERVER}
+		bind_dn = ${LDAP_BINDDN}
+		bind_pw = ${LDAP_BIND_PW}
+		search_base = ${LDAP_SEARCH_BASE}
+		filter = ${LDAP_FILTER}
+		${LDAP_CACHE_TTL:+cache_ttl = ${LDAP_CACHE_TTL}}
+		EOF
+	fi
+
 	dckr_info "Generated ${ETEBASE_EASY_CONFIG_PATH}"
 }
 
