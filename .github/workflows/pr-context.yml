@@ -8,21 +8,20 @@ on:
     paths:
       - "context/**"
 
+permissions:
+  contents: read
+
 jobs:
-  pr-context-base:
-    uses: ./.github/workflows/call_pr_check_build.yml
-    with:
-      flavor: "base"
-      version: "master"
+  pr-shell-lint:
+    runs-on: ubuntu-latest
 
-  pr-context-slim:
-    uses: ./.github/workflows/call_pr_check_build.yml
-    with:
-      flavor: "slim"
-      version: "master"
+    steps:
+      - name: Repository checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-  pr-context-alpine:
-    uses: ./.github/workflows/call_pr_check_build.yml
-    with:
-      flavor: "alpine"
-      version: "master"
+      - name: Differential ShellCheck
+        uses: redhat-plumbers-in-action/differential-shellcheck@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

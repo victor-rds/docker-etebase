@@ -7,10 +7,15 @@ on:
       - master
     paths:
       - "tags/alpine/Dockerfile"
-      - ".github/workflows/pr_alpine.yml"
 
 jobs:
-  pr-dckr-alpine:
+  pr-dckr-alpine-stable:
     uses: ./.github/workflows/call_pr_check_build.yml
     with:
       flavor: "alpine"
+
+  pr-dckr-alpine-master:
+    uses: ./.github/workflows/call_pr_check_build.yml
+    with:
+      flavor: "alpine"
+      version: "master"

@@ -7,10 +7,15 @@ on:
       - master
     paths:
       - "tags/base/Dockerfile"
-      - ".github/workflows/pr_base.yml"
 
 jobs:
-  pr-dckr-base:
+  pr-dckr-base-stable:
     uses: ./.github/workflows/call_pr_check_build.yml
     with:
       flavor: "base"
+
+  pr-dckr-base-master:
+    uses: ./.github/workflows/call_pr_check_build.yml
+    with:
+      flavor: "base"
+      version: "master"

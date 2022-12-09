@@ -7,11 +7,15 @@ on:
       - master
     paths:
       - "tags/slim/Dockerfile"
-      - ".github/workflows/pr_slim.yml"
 
 jobs:
-  pr-flavor-slim:
+  pr-dckr-slim-stable:
     uses: ./.github/workflows/call_pr_check_build.yml
     with:
       flavor: "slim"
 
+  pr-dckr-slim-master:
+    uses: ./.github/workflows/call_pr_check_build.yml
+    with:
+      flavor: "slim"
+      version: "master"
