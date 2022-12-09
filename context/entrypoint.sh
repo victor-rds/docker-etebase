@@ -14,7 +14,7 @@ C_GID="$(id -g)"
 readonly C_UID
 readonly C_GID
 
-declare -r MANAGE="$BASE_DIR/manage.py"
+declare -r MANAGE="${BASE_DIR}/manage.py"
 
 # logging functions
 dckr_log() {
@@ -52,17 +52,17 @@ file_env() {
   local var="$1"
   local fileVar="${var}_FILE"
   local def="${2:-}"
-  if [ "${!var:-}" ] && [ "${!fileVar:-}" ]; then
-    dckr_error "error: both $var and $fileVar are set (but are exclusive)"
+  if [ -n "${!var:-}" ] && [ -n "${!fileVar:-}" ]; then
+    dckr_error "error: both ${var} and ${fileVar} are set (but are exclusive)"
   fi
-  local val="$def"
-  if [ "${!var:-}" ]; then
+  local val="${def}"
+  if [ -n "${!var:-}" ]; then
     val="${!var}"
-  elif [ "${!fileVar:-}" ]; then
+  elif [ -n "${!fileVar:-}" ]; then
     val="$(<"${!fileVar}")"
   fi
-  export "$var"="$val"
-  unset "$fileVar"
+  export "${var}"="${val}"
+  unset "${fileVar}"
 }
 
 init_env() {
@@ -80,8 +80,8 @@ init_env() {
   : "${TIME_ZONE:=UTC}"
   : "${ALLOWED_HOSTS:=*}"
 
-  declare -g -x X509_CRT=${X509_CRT:=$DATA_DIR/certs/crt.pem}
-  declare -g -x X509_KEY=${X509_KEY:=$DATA_DIR/certs/key.pem}
+  declare -g -x X509_CRT=${X509_CRT:=${DATA_DIR}/certs/crt.pem}
+  declare -g -x X509_KEY=${X509_KEY:=${DATA_DIR}/certs/key.pem}
 
   file_env 'DB_ENGINE' 'sqlite'
   file_env 'DATABASE_NAME'
@@ -133,10 +133,10 @@ output_perms() {
       dckr_debug "${FD} is not writable"
     fi
 
-    if [ "$PROK" = 't' ] && { [ "$BIT" = 'r' ] || [ "$PWOK" = 't' ]; }; then
+    if [ "${PROK}" = 't' ] && { [ "${BIT}" = 'r' ] || [ "${PWOK}" = 't' ]; }; then
       dckr_info "Permissions: Ok"
     else
-      if [ "$BIT" = 'w' ]; then
+      if [ "${BIT}" = 'w' ]; then
         dckr_warn "Permissions: Failed [ Cannot write ${FD} ]"
       else
         dckr_warn "Permissions: Failed [ Cannot read ${FD} ]"
@@ -217,10 +217,10 @@ name = ${DATABASE_NAME}
 migrate() {
   local _AUTO=$1
 
-  $MANAGE showmigrations -l | grep -v '\[X\]'
+  ${MANAGE} showmigrations -l | grep -v '\[X\]'
 
   if [ -n "${_AUTO}" ]; then
-    $MANAGE migrate
+    ${MANAGE} migrate
   else
     dckr_warn "If necessary please run: docker exec -it ${HOSTNAME} python manage.py migrate"
   fi
@@ -229,11 +229,11 @@ migrate() {
 create_superuser() {
   file_env 'SUPER_USER'
 
-  if [ "${SUPER_USER}" ]; then
+  if [ -n "${SUPER_USER}" ]; then
     dckr_info 'Creating Super User'
     file_env 'SUPER_PASS'
 
-    if [ -z "$SUPER_PASS" ]; then
+    if [ -z "${SUPER_PASS}" ]; then
       SUPER_PASS=$(openssl rand -base64 24)
       dckr_info "
 ----------------------------------------------------
@@ -255,7 +255,7 @@ set_auto_signup() {
 
 check_db() {
 
-  $MANAGE migrate --plan 2>/tmp/db_error | grep 'django_etebase.0001_initial' >/dev/null
+  ${MANAGE} migrate --plan 2>/tmp/db_error | grep 'django_etebase.0001_initial' >/dev/null
   local _PS=("${PIPESTATUS[@]}")
 
   if [ "${_PS[0]}" -eq "0" ] && [ "${_PS[1]}" -eq "0" ]; then
@@ -289,7 +289,7 @@ set_auto_signup
 check_db
 
 if [ -w "$(grep static_root "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/static_root = //g')" ]; then
-  $MANAGE collectstatic --no-input
+  ${MANAGE} collectstatic --no-input
 fi
 
 if [ "${SERVER}" = 'https' ] && { [ ! -e "${X509_CRT}" ] || [ ! -e "${X509_KEY}" ]; }; then
@@ -319,4 +319,4 @@ if [ "${SHELL_DEBUG}" = "true" ]; then
   set +x
 fi
 
-exec $_CMD "$@"
+exec ${_CMD} "$@"
