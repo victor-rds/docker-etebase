@@ -15,8 +15,6 @@ readonly C_UID
 readonly C_GID
 
 declare -r MANAGE="$BASE_DIR/manage.py"
-declare -r ERROR_PERM_TEMPLATE="%s : Permission Denied. Please check the volume permissions or the user (%s:%s) running the container."
-declare -r ERROR_DB_TEMPLATE='Failed do access %s database. Please check the database connection or file permission.'
 
 # logging functions
 dckr_log() {
@@ -172,8 +170,7 @@ check_perms() {
 }
 
 gen_inifile() {
-  # shellcheck disable=SC2059
-  touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "$(printf "${ERROR_PERM_TEMPLATE}" "${ETEBASE_EASY_CONFIG_PATH}" "${C_UID}" "${C_GID}")"
+  touch "${ETEBASE_EASY_CONFIG_PATH}" 2>/dev/null || dckr_error "${ETEBASE_EASY_CONFIG_PATH} : Permission Denied. Please check the volume permissions or the user (${C_UID}:${C_GID}) running the container."
 
   echo "[global]
 secret_file = ${SECRET_FILE}
@@ -267,8 +264,7 @@ check_db() {
   elif [ "${_PS[0]}" -eq "0" ] && [ "${_PS[1]}" -ne "0" ]; then
     migrate "${AUTO_UPDATE}"
   else
-    # shellcheck disable=SC2059
-    dckr_error "$(printf "${ERROR_DB_TEMPLATE}" "${DB_ENGINE}")$(echo && cat /tmp/db_error)"
+    dckr_error "Failed do access ${DB_ENGINE} database. Please check the database connection or file permission.\n $(cat /tmp/db_error)"
   fi
 }
 
