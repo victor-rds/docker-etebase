@@ -106,3 +106,24 @@ jobs:
           tags: ${{ steps.docker_metadata.outputs.tags }}
           labels: ${{ steps.docker_metadata.outputs.labels }}
           push: ${{ inputs.pushit }}
+
+      - name: Jop Summary
+        shell: bash
+        run: |
+          cat > summary.md << EOF
+          ### Build successful: :white_check_mark:
+
+          Etesync Version: ${{ steps.server_version.outputs.ete_version }}
+          Image Type: ${{ inputs.flavor }}
+          Platforms: ${{ inputs.platforms }}
+
+          #### Docker:
+          ImageID: ${{ steps.docker_build_push.outputs.imageid }}
+          Digest: ${{ steps.docker_build_push.outputs.digest }}
+          ~~~
+          ${{ steps.docker_build_push.outputs.metadata }}
+          ~~~
+
+          EOF
+
+          cat summary.md >> $GITHUB_STEP_SUMMARY
