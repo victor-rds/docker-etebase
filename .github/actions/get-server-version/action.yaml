@@ -8,8 +8,14 @@ inputs:
 
 outputs:
   version:
-    description: "Etebase Version"
+    description: "Clear Version (removes 'v' when necessary"
     value: ${{ steps.get_version_file.outputs.version }}
+  is_semver:
+    description: "If version is a SEMVER or tag/brach"
+    value: ${{ steps.get_version_file.outputs.is_semver }}
+  ete_version:
+    description: "Etebase Version"
+    value: ${{ steps.get_version_file.outputs.ete_version }}
 
 runs:
   using: "composite"
@@ -19,12 +25,24 @@ runs:
       env:
         OVERRIDE: ${{ inputs.force }}
       run: |
-        source ./server_version
-
-        if [ ! -z "${OVERRIDE}" ]; then
+        if [ -z "${OVERRIDE}" ]; then
+          source ./server_version
+        else
           ETESYNC_VERSION="${OVERRIDE}"
         fi
 
-        echo ${ETESYNC_VERSION}
+        CLEAN_VERSION="${ETESYNC_VERSION#v}"
 
-        echo ::set-output name=version::${ETESYNC_VERSION}
+        if [[ ${CLEAN_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          SEMVER='true'
+        else
+          SEMVER='false'
+        fi
+
+        echo "*Version*: ${CLEAN_VERSION}" >> $GITHUB_STEP_SUMMARY
+        echo "*Is SemVer*? ${SEMVER}" >> $GITHUB_STEP_SUMMARY
+        echo "*Etesync Version*: ${ETESYNC_VERSION}" >> $GITHUB_STEP_SUMMARY
+
+        echo "version=${CLEAN_VERSION}" >> $GITHUB_OUTPUT
+        echo "is_semver=${SEMVER}" >> $GITHUB_OUTPUT
+        echo "ete_version=${ETESYNC_VERSION}" >> $GITHUB_OUTPUT

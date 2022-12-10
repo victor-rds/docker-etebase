@@ -38,5 +38,5 @@ jobs:
           context: .
           file: ./tags/${{ inputs.flavor }}/Dockerfile
           tags: victorrds/etebase:${{ github.sha }}-${{ inputs.flavor }}
-          build-args: ETE_VERSION=${{ steps.server_version.outputs.version }}
+          build-args: ETE_VERSION=${{ steps.server_version.outputs.ete_version }}
           push: false

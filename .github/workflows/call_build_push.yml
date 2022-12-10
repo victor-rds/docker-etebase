@@ -69,14 +69,14 @@ jobs:
             victorrds/etebase
             victorrds/etesync
           flavor: |
-            latest=${{ ( inputs.flavor == 'base' && steps.build_metadata.outputs.semver == 'true' ) }}
+            latest=${{ ( inputs.flavor == 'base' && steps.server_version.outputs.is_semver == 'true' ) }}
             suffix=${{ steps.build_metadata.outputs.suffix }}
           tags: |
             type=edge,enable=${{ inputs.tag == 'edge' }},branch=${{ steps.build_metadata.outputs.source_name }}
             type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' && inputs.tag != 'edge' }}
-            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ steps.build_metadata.outputs.semver == 'true' }}
-            type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
+            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ steps.server_version.outputs.is_semver == 'true' }}
+            type=semver,pattern={{version}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
 
       - id: qemu
         name: Set up QEMU
@@ -102,7 +102,7 @@ jobs:
           platforms: ${{ inputs.platforms }}
           context: .
           file: ./tags/${{ inputs.flavor }}/Dockerfile
-          build-args: ETE_VERSION=${{ steps.build_metadata.outputs.ete_version }}
+          build-args: ETE_VERSION=${{ steps.server_version.outputs.ete_version }}
           tags: ${{ steps.docker_metadata.outputs.tags }}
           labels: ${{ steps.docker_metadata.outputs.labels }}
           push: ${{ inputs.pushit }}

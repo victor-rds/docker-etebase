@@ -26,7 +26,7 @@ jobs:
 
       - id: create_release
         name: Create Release
-        if: ${{ github.event.inputs.version != 'master' }}
+        if: ${{ steps.server_version.outputs.is_semver == 'true' }}
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
@@ -34,7 +34,7 @@ jobs:
           removeArtifacts: true
           replacesArtifacts: true
           commit: ${{ github.sha }}
-          name: "${{ inputs.version }}"
+          name: "${{ steps.server_version.outputs.version }}"
           generateReleaseNotes: true
           prerelease: false
-          tag: ${{ inputs.version }}
+          tag: ${{ steps.server_version.outputs.version }}
