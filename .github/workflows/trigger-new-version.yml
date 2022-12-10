@@ -1,5 +1,5 @@
 ---
-name: Trigger Build New Versions
+name: Trigger New Versions Builds
 
 on:
   push:
@@ -35,3 +35,7 @@ jobs:
     secrets:
       dckr_username: ${{ secrets.DOCKER_USER }}
       dckr_token: ${{ secrets.DOCKER_TOKEN }}
+
+  create-releases:
+    needs: [base-new-version, slim-new-version, alpine-new-version]
+    uses: ./.github/workflows/call_release.yml

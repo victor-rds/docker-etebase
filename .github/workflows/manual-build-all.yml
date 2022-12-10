@@ -1,5 +1,5 @@
 ---
-name: Manual All Flavor Builds
+name: Manual Build - All
 
 on:
   workflow_dispatch:
@@ -67,3 +67,10 @@ jobs:
     secrets:
       dckr_username: ${{ secrets.DOCKER_USER }}
       dckr_token: ${{ secrets.DOCKER_TOKEN }}
+
+  create-releases:
+    if: inputs.pushit
+    needs: [base-manual, slim-manual, alpine-manual]
+    uses: ./.github/workflows/call_release.yml
+    with:
+      version: ${{ github.event.inputs.version }}

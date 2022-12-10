@@ -1,6 +1,6 @@
 
 ---
-name: Call Release
+name: Create Release
 on:
   workflow_call:
     inputs:
