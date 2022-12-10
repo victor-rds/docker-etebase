@@ -1,5 +1,5 @@
 ---
-name: Test Pull Request changes to Context
+name: (Pull Request) Check changes to Context
 
 on:
   pull_request:

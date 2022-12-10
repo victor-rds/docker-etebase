@@ -1,5 +1,5 @@
 ---
-name: Trigger Workflow Test
+name: (Test) Trigger Workflow
 
 on:
   workflow_dispatch:

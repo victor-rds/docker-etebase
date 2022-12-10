@@ -1,5 +1,5 @@
 ---
-name: Test Pull Request on the Debian Slim Image
+name: (Pull Request) Check Slim images builds
 
 on:
   pull_request:

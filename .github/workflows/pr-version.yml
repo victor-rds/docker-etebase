@@ -1,5 +1,5 @@
 ---
-name: Test Pull Request of a new Etesync Server Version
+name: (Pull Request) Check new Etebase versions
 
 on:
   pull_request:

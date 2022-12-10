@@ -1,5 +1,5 @@
 ---
-name: Call Build and Push
+name: Build and Push
 
 on:
   workflow_call:
@@ -39,6 +39,8 @@ jobs:
     steps:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - id: server_version
         name: Get Server Version
@@ -76,12 +78,13 @@ jobs:
             type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
 
-      - name: Set up QEMU
+      - id: qemu
+        name: Set up QEMU
         if: contains(inputs.platforms, 'linux/arm')
         uses: docker/setup-qemu-action@v2.1.0
 
-      - name: Set up Docker Buildx
-        id: buildx
+      - id: buildx
+        name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2.2.1
 
       - name: Login to DockerHub
@@ -91,8 +94,8 @@ jobs:
           username: ${{ secrets.dckr_username }}
           password: ${{ secrets.dckr_token }}
 
-      - name: Docker Build and Push
-        id: docker_build_push
+      - id: docker_build_push
+        name: Docker Build and Push
         uses: docker/build-push-action@v3.2.0
         with:
           builder: ${{ steps.buildx.outputs.name }}

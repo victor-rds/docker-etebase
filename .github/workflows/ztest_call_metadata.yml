@@ -1,5 +1,5 @@
 ---
-name: Call Metadata Actions for Dispatch Build
+name: (Test) Metadata Actions for Dispatch Build
 
 on:
   workflow_call:

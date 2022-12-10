@@ -1,5 +1,5 @@
 ---
-name: Test Pull Request on the Debian Image
+name: (Pull Request) Check Base images builds
 
 on:
   pull_request:

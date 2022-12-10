@@ -1,5 +1,5 @@
 ---
-name: Manual Sigle Flavor Build
+name: Manual Build - Sigle Flavor
 
 on:
   workflow_dispatch:

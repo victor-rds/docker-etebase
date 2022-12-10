@@ -1,5 +1,5 @@
 ---
-name: Test Pull Request on the Alpine Image
+name: (Pull Request) Check Alpine images builds
 
 on:
   pull_request:
