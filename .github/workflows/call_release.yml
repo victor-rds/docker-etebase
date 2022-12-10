@@ -1,0 +1,40 @@
+
+---
+name: Call Release
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "EteBase Version"
+        required: false
+        type: string
+
+jobs:
+  build-n-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - id: server_version
+        uses: ./.github/actions/get-server-version
+        with:
+          force: ${{ inputs.version }}
+
+      - id: create_release
+        name: Create Release
+        if: ${{ github.event.inputs.version != 'master' }}
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          removeArtifacts: true
+          replacesArtifacts: true
+          commit: ${{ github.sha }}
+          name: "${{ inputs.version }}"
+          generateReleaseNotes: true
+          prerelease: false
+          tag: ${{ inputs.version }}

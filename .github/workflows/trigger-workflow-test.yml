@@ -50,3 +50,10 @@ jobs:
       platforms: ${{ github.event.inputs.platforms }}
       tag: ${{ github.event.inputs.tag }}
       pushit: ${{ github.event.inputs.pushit == 'true' }}
+
+  test-releases:
+    if: ${{ github.event.inputs.pushit == 'true' }}
+    needs: [test-base-workflow, test-slim-workflow, test-alpine-workflow]
+    uses: ./.github/workflows/call_release.yml
+    with:
+      version: ${{ github.event.inputs.version }}
