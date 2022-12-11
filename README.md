@@ -8,7 +8,7 @@ The following tags are built on latest python image and latest version of Etebas
 
 - `latest` [(tags/latest/Dockerfile)](tags/base/Dockerfile)
 - `slim`  [(tags/slim/Dockerfile)](tags/slim/Dockerfile)
-- `alpine` [(tags/alpine/Dockerfile)](tags/alpine/Dockerfile)
+- `alpine` [(tags/alpine/Dockerfile)](tags/alpine/Dockerfile) (Not available for ARMv7 See #181)
 
 Release builds are available as versioned tags, for example: `X.Y.Z` or `X.Y.Z-type`
 

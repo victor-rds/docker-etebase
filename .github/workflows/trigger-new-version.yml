@@ -32,6 +32,7 @@ jobs:
     with:
       flavor: "alpine"
       pushit: true
+      platforms: "linux/amd64,linux/arm64"
     secrets:
       dckr_username: ${{ secrets.DOCKER_USER }}
       dckr_token: ${{ secrets.DOCKER_TOKEN }}
