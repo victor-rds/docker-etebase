@@ -109,21 +109,29 @@ jobs:
 
       - name: Jop Summary
         shell: bash
+        if: ${{ always() }}
         run: |
-          cat > summary.md << EOF
-          ### Build successful: :white_check_mark:
+          if ["${{ steps.docker_build_push.conclusion}}" == 'success' ]; then
+            echo '### Build successful: :white_check_mark:' > summary.md
+          else
+            echo '### Build failure: :x:' > summary.md
+          fi
 
+          cat >> summary.md << EOF
           Etesync Version: ${{ steps.server_version.outputs.ete_version }}
           Image Type: ${{ inputs.flavor }}
           Platforms: ${{ inputs.platforms }}
+          EOF
 
+          if ["${{ steps.docker_build_push.conclusion}}" == 'success' ]; then
+            cat >> summary.md << EOF
           #### Docker:
           ImageID: ${{ steps.docker_build_push.outputs.imageid }}
           Digest: ${{ steps.docker_build_push.outputs.digest }}
           ~~~
           ${{ steps.docker_build_push.outputs.metadata }}
           ~~~
-
           EOF
+          fi
 
           cat summary.md >> $GITHUB_STEP_SUMMARY
