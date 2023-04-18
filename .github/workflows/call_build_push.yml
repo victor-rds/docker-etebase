@@ -57,7 +57,7 @@ jobs:
 
       - id: docker_metadata
         name: Prepare Docker Metadata
-        uses: docker/metadata-action@v4.3.0
+        uses: docker/metadata-action@v4.4.0
         with:
           labels: |
             maintainer=victor-rds
