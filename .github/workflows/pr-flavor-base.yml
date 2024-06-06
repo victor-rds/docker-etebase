@@ -10,12 +10,12 @@ on:
 
 jobs:
   pr-dckr-base-stable:
-    uses: ./.github/workflows/call_pr_check_build.yml
+    uses: ./.github/workflows/call_pr_build.yml
     with:
       flavor: "base"
 
   pr-dckr-base-master:
-    uses: ./.github/workflows/call_pr_check_build.yml
+    uses: ./.github/workflows/call_pr_build.yml
     with:
       flavor: "base"
       version: "master"
