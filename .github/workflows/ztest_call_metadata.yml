@@ -34,17 +34,20 @@ jobs:
     steps:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - id: server_version
+        name: Get Server Version
         uses: ./.github/actions/get-server-version
         with:
-          force: ${{ inputs.version }}
+          force: ${{ github.event.inputs.version }}
 
       - id: build_metadata
         name: Prepare Project Metadata
         uses: ./.github/actions/build-metadata
         with:
-          flavor: ${{ inputs.flavor }}
+          flavor: ${{ github.event.inputs.flavor }}
           version: ${{ steps.server_version.outputs.version }}
 
       - id: docker_metadata
@@ -61,29 +64,38 @@ jobs:
             victorrds/etebase
             victorrds/etesync
           flavor: |
-            latest=${{ ( inputs.flavor == 'base' && steps.build_metadata.outputs.semver == 'true' ) }}
+            latest=${{ ( inputs.flavor == 'base' && steps.server_version.outputs.is_semver == 'true' ) }}
             suffix=${{ steps.build_metadata.outputs.suffix }}
           tags: |
-            type=edge,enable=${{ inputs.tag == 'edge' }},branch=${{ steps.build_metadata.outputs.source_name }}
-            type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' && inputs.tag != 'edge' }}
-            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ steps.build_metadata.outputs.semver == 'true' }}
-            type=semver,pattern={{version}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.build_metadata.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.build_metadata.outputs.semver == 'true' }}
+            type=edge,branch=${{ steps.build_metadata.outputs.source_name }}
+            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' }}
+            type=raw,value=${{ github.event.inputs.flavor }},suffix=,enable=${{ github.event.inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
+            type=semver,pattern={{version}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ github.event.inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ github.event.inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
+
 
       - name: Metadata Output
         shell: bash
         run: |
           echo -e '########## inputs ##########\n'
 
-          echo -e "flavor: ${{ inputs.flavor }}\n"
+          echo -e "flavor: ${{ github.event.inputs.flavor }}\n"
 
-          echo -e "version: ${{ inputs.version }}\n"
+          echo -e "version: ${{ github.event.inputs.version }}\n"
 
-          echo -e "platforms: ${{ inputs.platforms }}\n"
+          echo -e "platforms: ${{ github.event.inputs.platforms }}\n"
 
-          echo -e "tag: ${{ inputs.tag }}\n"
+          echo -e "tag: ${{ github.event.inputs.tag }}\n"
 
-          echo -e "pushit: ${{ inputs.pushit }}\n"
+          echo -e "pushit: ${{ github.event.inputs.pushit }}\n"
+
+          echo -e "${{ toJson(github.event.inputs) }}"
+
+          echo -e '########## server_version ##########\n'
+
+          echo -e "ete_version: ${{ steps.server_version.outputs.ete_version }}\n"
+
+          echo -e "semver: ${{ steps.server_version.outputs.is_semver }}\n"
 
           echo -e '########## build_metadata ##########\n'
 
@@ -95,6 +107,8 @@ jobs:
 
           echo -e "label_version: ${{ steps.build_metadata.outputs.label_version }}\n"
 
-          echo -e "ete_version: ${{ steps.build_metadata.outputs.ete_version }}\n"
+          echo -e '########## docker_metadata ##########\n'
 
-          echo -e "semver: ${{ steps.build_metadata.outputs.semver }}\n"
+          echo -e "${{ steps.docker_metadata.outputs.tags }}\n"
+
+          echo -e "${{ steps.docker_metadata.outputs.labels }}\n"

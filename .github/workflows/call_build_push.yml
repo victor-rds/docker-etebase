@@ -72,9 +72,9 @@ jobs:
             latest=${{ ( inputs.flavor == 'base' && steps.server_version.outputs.is_semver == 'true' ) }}
             suffix=${{ steps.build_metadata.outputs.suffix }}
           tags: |
-            type=edge,enable=${{ inputs.tag == 'edge' }},branch=${{ steps.build_metadata.outputs.source_name }}
-            type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' && inputs.tag != 'edge' }}
-            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ steps.server_version.outputs.is_semver == 'true' }}
+            type=edge,enable=${{ inputs.tag != '' }},branch=${{ steps.build_metadata.outputs.source_name }}
+            type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
+            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
             type=semver,pattern={{version}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
 
