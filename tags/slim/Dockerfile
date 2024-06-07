@@ -28,7 +28,7 @@ RUN set -eux; \
     export BUILD_DEPS='build-essential libffi-dev libpq-dev libssl-dev libldap2-dev libsasl2-dev git'; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support \
-        libffi7 libpq5 libssl1.1 libldap-2.4-2 libsasl2-2 ${BUILD_DEPS}; \
+        libffi8 libpq5 libssl3 libldap-common libsasl2-2 ${BUILD_DEPS}; \
     # Download Etebase and install dependencies
     git clone --depth=1 --branch=${ETE_VERSION} "${ETE_REPO}" "${BASE_DIR}"; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
