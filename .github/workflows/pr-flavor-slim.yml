@@ -3,6 +3,7 @@ name: (Pull Request) Check Slim images builds
 
 on:
   pull_request:
+    types: [ opened, synchronize, reopened ]
     branches:
       - master
     paths:

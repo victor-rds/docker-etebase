@@ -3,24 +3,17 @@ name: (Pull Request) Check new Etebase versions
 
 on:
   pull_request:
+    types: [ opened, synchronize, reopened ]
     branches:
       - master
     paths:
       - "server_version"
 
 jobs:
-  pr-version-base:
+  pr-version:
     uses: ./.github/workflows/call_pr_build.yml
+    strategy:
+      matrix:
+        flavor: [ "base", "slim", "alpine" ]
     with:
-      flavor: "base"
-
-  pr-version-slim:
-    uses: ./.github/workflows/call_pr_build.yml
-    with:
-      flavor: "slim"
-
-  pr-version-alpine:
-    uses: ./.github/workflows/call_pr_build.yml
-    with:
-      flavor: "alpine"
-
+      flavor: ${{ matrix.flavor }}

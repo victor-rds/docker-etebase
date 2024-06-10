@@ -1,0 +1,70 @@
+---
+name: Manual Build Matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      flavors:
+        description: "Base images"
+        default: "base,slim,alpine"
+        required: false
+        type: choice
+        options:
+          - '[ "base", "slim", "alpine" ]'
+          - '[ "base", "slim" ]'
+          - '[ "base", "alpine" ]'
+          - '[ "slim", "alpine" ]'
+          - '[ "base" ]'
+          - '[ "slim" ]'
+          - '[ "alpine" ]'
+      version:
+        description: "EteBase Version"
+        required: false
+        default: ""
+        type: string
+      platforms:
+        description: "Platforms to build"
+        required: false
+        default: '[ "linux/amd64","linux/arm64" ]'
+        type: choice
+        options:
+          - '[ "linux/amd64","linux/arm64","linux/arm/v7" ]'
+          - '[ "linux/amd64","linux/arm64" ]'
+          - '[ "linux/arm64","linux/arm/v7" ]'
+          - '[ "linux/amd64" ]'
+          - '[ "linux/arm64" ]'
+          - '[ "linux/arm/v7" ]'
+      pushit:
+        description: "Should push?"
+        required: false
+        default: false
+        type: boolean
+      tag:
+        description: "Custom Tag"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  manual-build-matrix:
+    uses: ./.github/workflows/call_build_push.yml
+    strategy:
+      matrix:
+        platform: ${{ fromJson(github.event.inputs.platforms) }}
+        flavor: ${{ fromJson(github.event.inputs.flavors) }}
+    with:
+      flavor: ${{ matrix.flavor }}
+      version: ${{ github.event.inputs.version }}
+      platforms: ${{ matrix.platform }}
+      pushit: ${{ github.event.inputs.pushit == 'true' }}
+      tag: ${{ github.event.inputs.tag }}
+    secrets:
+      dckr_username: ${{ secrets.DOCKER_USER }}
+      dckr_token: ${{ secrets.DOCKER_TOKEN }}
+
+  create-releases:
+    if: inputs.pushit
+    needs: manual-build-matrix
+    uses: ./.github/workflows/call_release.yml
+    with:
+      version: ${{ github.event.inputs.version }}
