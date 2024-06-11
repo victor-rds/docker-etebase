@@ -78,7 +78,7 @@ init_env() {
 	: "${DEBUG_DJANGO:=false}"
 	: "${LANGUAGE_CODE:=en-us}"
 	: "${TIME_ZONE:=UTC}"
-	: "${ALLOWED_HOSTS:=*}"
+	: "${ALLOWED_HOSTS:='*,.localhost,127.0.0.1,[::1]'}"
 
 	declare -g -x X509_CRT=${X509_CRT:=${DATA_DIR}/certs/crt.pem}
 	declare -g -x X509_KEY=${X509_KEY:=${DATA_DIR}/certs/key.pem}
@@ -177,7 +177,7 @@ gen_inifile() {
 	if [ "${DB_ENGINE}" = "postgres" ]; then
 		DB_BACKEND="django.db.backends.postgresql"
 	else
-	    DB_BACKEND="django.db.backends.sqlite3"
+		DB_BACKEND="django.db.backends.sqlite3"
 	fi
 
 	cat <<- EOF > "${ETEBASE_EASY_CONFIG_PATH}"
@@ -191,9 +191,6 @@ gen_inifile() {
 	language_code = ${LANGUAGE_CODE}
 	time_zone = ${TIME_ZONE}
 	${REDIS_URI:+redis_uri = ${REDIS_URI}}
-
-	[allowed_hosts]
-	allowed_host1 = ${ALLOWED_HOSTS}
 
 	[database]
 	engine = ${DB_BACKEND}
@@ -225,6 +222,13 @@ gen_inifile() {
 		${LDAP_CACHE_TTL:+cache_ttl = ${LDAP_CACHE_TTL}}
 		EOF
 	fi
+
+	echo '[allowed_hosts]' >> "${ETEBASE_EASY_CONFIG_PATH}"local -a AHOSTS
+	local IFS=,
+	read -ra AHOSTS <<< "${ALLOWED_HOSTS}"
+	for i in "${!AHOSTS[@]}"; do
+		printf "allowed_hosts%d = %s\n" "$((i+1))" "${AHOSTS[$i]}" >> "${ETEBASE_EASY_CONFIG_PATH}"
+	done
 
 	dckr_info "Generated ${ETEBASE_EASY_CONFIG_PATH}"
 }
