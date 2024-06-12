@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Dockerfiles and Context
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -52,7 +52,7 @@ jobs:
 
       - id: docker_metadata
         name: Prepare Docker Metadata
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.5.1
         with:
           labels: |
             maintainer=victor-rds

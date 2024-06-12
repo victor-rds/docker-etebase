@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Dockerfiles and Context
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - id: server_version
         uses: ./.github/actions/get-server-version
@@ -28,11 +28,11 @@ jobs:
 
       - id: buildx
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2.10.0
+        uses: docker/setup-buildx-action@v3.3.0
 
       - id: docker_pr_build
         name: PR Build
-        uses: docker/build-push-action@v3.3.1
+        uses: docker/build-push-action@v5.4.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
