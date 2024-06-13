@@ -19,8 +19,7 @@ jobs:
         with:
           sparse-checkout: |
             server_version
-            ./.github/actions/get-server-version
-          sparse-checkout-cone-mode: false
+            ./.github/actions
       - id: get_version
         name: Get Server Version
         uses: ./.github/actions/get-server-version
