@@ -9,13 +9,13 @@ inputs:
 outputs:
   version:
     description: "Clear Version (removes 'v' when necessary)"
-    value: ${{ steps.get_version_file.outputs.version }}
+    value: ${{ steps.export_version.outputs.version }}
   is_semver:
     description: "If version is a SEMVER or tag/brach"
-    value: ${{ steps.get_version_file.outputs.is_semver }}
+    value: ${{ steps.export_version.outputs.is_semver }}
   ete_version:
     description: "Etebase Version"
-    value: ${{ steps.get_version_file.outputs.ete_version }}
+    value: ${{ steps.export_version.outputs.ete_version }}
 
 runs:
   using: "composite"
@@ -25,8 +25,6 @@ runs:
       env:
         VERSION: ${{ inputs.version }}
       run: |
-        echo $VERSION
-
         CLEAN_VERSION="${VERSION#v}"
 
         if [[ ${CLEAN_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
