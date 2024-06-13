@@ -21,11 +21,17 @@ jobs:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v4
 
+      - id: get_version
+        name: Get Server Version
+        uses: ./.github/actions/get-server-version
+        with:
+          version: ${{ inputs.version }}
+
       - id: process_version
         name: Process Version data
         uses: ./.github/actions/process-version
         with:
-          version: ${{ inputs.version }}
+          version: ${{ steps.get_version.outputs.version }}
 
       - id: buildx
         name: Set up Docker Buildx
