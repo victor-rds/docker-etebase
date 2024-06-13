@@ -16,4 +16,5 @@ jobs:
       matrix:
         flavor: [ "base", "slim", "alpine" ]
     with:
+      version: stable
       flavor: ${{ matrix.flavor }}

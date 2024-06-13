@@ -10,13 +10,11 @@ on:
       - "tags/alpine/Dockerfile"
 
 jobs:
-  pr-dckr-alpine-stable:
+  pr-dckr-alpine:
+    strategy:
+      matrix:
+        version: [ "stable", "master" ]
     uses: ./.github/workflows/call_pr_build.yml
     with:
       flavor: "alpine"
-
-  pr-dckr-alpine-master:
-    uses: ./.github/workflows/call_pr_build.yml
-    with:
-      flavor: "alpine"
-      version: "master"
+      version: ${{ matrix.version }}

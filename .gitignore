@@ -2,5 +2,5 @@ test
 examples/production/certs/*
 .actrc
 .env
-.event.json
+.act.*.json
 .secrets

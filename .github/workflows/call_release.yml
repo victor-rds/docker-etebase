@@ -6,27 +6,27 @@ on:
     inputs:
       version:
         description: "EteBase Version"
-        required: false
+        required: true
         type: string
 
 jobs:
-  build-n-push:
+  releases-only:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Checkout Dockerfiles and Context
+        uses: actions/checkout@v4
 
-      - id: server_version
-        uses: ./.github/actions/get-server-version
+      - id: process_version
+        name: Process Version data
+        uses: ./.github/actions/process-version
         with:
-          force: ${{ inputs.version }}
+          version: ${{ inputs.version }}
 
       - id: create_release
         name: Create Release
-        if: ${{ steps.server_version.outputs.is_semver == 'true' }}
+        if: ${{ steps.process_version.outputs.is_semver == 'true' }}
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
@@ -34,7 +34,7 @@ jobs:
           removeArtifacts: true
           replacesArtifacts: true
           commit: ${{ github.sha }}
-          name: "${{ steps.server_version.outputs.version }}"
+          name: "${{ steps.process_version.outputs.version }}"
           generateReleaseNotes: true
           prerelease: false
-          tag: ${{ steps.server_version.outputs.version }}
+          tag: ${{ steps.process_version.outputs.version }}

@@ -4,11 +4,19 @@ name: (Test) Metadata Actions for Dispatch Build
 on:
   workflow_call:
     inputs:
-      flavor:
-        description: "Set the base image [base, slim or alpine]"
-        default: "base"
+      flavors:
+        description: "Base images"
+        default: '[ "base", "slim", "alpine" ]'
         required: false
-        type: string
+        type: choice
+        options:
+          - '[ "base", "slim", "alpine" ]'
+          - '[ "base", "slim" ]'
+          - '[ "base", "alpine" ]'
+          - '[ "slim", "alpine" ]'
+          - '[ "base" ]'
+          - '[ "slim" ]'
+          - '[ "alpine" ]'
       version:
         description: "EteBase Version"
         required: false
@@ -29,26 +37,61 @@ on:
         type: boolean
 
 jobs:
-  test-data:
+  test-prepare-metadata:
     runs-on: ubuntu-latest
+    outputs:
+      ete_version: ${{ steps.get_version.outputs.version }}
     steps:
-      - name: Checkout Dockerfiles and Context
+      - name: Checkout Version and Workflow files
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          sparse-checkout: |
+            server_version
+            ./.github/actions/get-server-version
+          sparse-checkout-cone-mode: false
 
-      - id: server_version
+      - id: get_version
         name: Get Server Version
         uses: ./.github/actions/get-server-version
         with:
-          force: ${{ github.event.inputs.version }}
+          version: ${{ github.event.inputs.version }}
+
+      - id: show_input
+        run: |
+          echo '########## inputs ##########'
+          echo "flavor: ${{ github.event.inputs.flavors }}"
+          echo "version: ${{ github.event.inputs.version }}"
+          echo "platforms: ${{ github.event.inputs.platforms }}"
+          echo "tag: ${{ github.event.inputs.tag }}"
+          echo "pushit: ${{ github.event.inputs.pushit }}"
+
+          echo '########## ete-version ##########'
+          echo "ete-version: ${{ steps.get_version.outputs.version }}"
+
+  test-generate-metadata:
+    needs: test-prepare-metadata
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: ${{ fromJson(github.event.inputs.platforms) }}
+        flavor: ${{ fromJson(github.event.inputs.flavors) }}
+    steps:
+      - id: checkout
+        name: Checkout Dockerfiles and Context
+        uses: actions/checkout@v4
+
+      - id: process_version
+        name: Process Version data
+        uses: ./.github/actions/process-version
+        with:
+          version: ${{ needs.test-prepare-metadata.outputs.ete_version }}
 
       - id: build_metadata
         name: Prepare Project Metadata
         uses: ./.github/actions/build-metadata
         with:
-          flavor: ${{ github.event.inputs.flavor }}
-          version: ${{ steps.server_version.outputs.version }}
+          flavor: ${{ matrix.flavor }}
+          version: ${{ steps.process_version.outputs.version }}
 
       - id: docker_metadata
         name: Prepare Docker Metadata
@@ -64,51 +107,32 @@ jobs:
             victorrds/etebase
             victorrds/etesync
           flavor: |
-            latest=${{ ( inputs.flavor == 'base' && steps.server_version.outputs.is_semver == 'true' ) }}
+            latest=${{ ( matrix.flavor == 'base' && steps.process_version.outputs.is_semver == 'true' ) }}
             suffix=${{ steps.build_metadata.outputs.suffix }}
           tags: |
-            type=edge,branch=${{ steps.build_metadata.outputs.source_name }}
-            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' }}
-            type=raw,value=${{ github.event.inputs.flavor }},suffix=,enable=${{ github.event.inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
-            type=semver,pattern={{version}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ github.event.inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.server_version.outputs.ete_version }},enable=${{ github.event.inputs.tag == '' && steps.server_version.outputs.is_semver == 'true' }}
-
+            type=edge,enable=${{ inputs.tag != '' }},branch=${{ steps.build_metadata.outputs.source_name }}
+            type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
+            type=raw,value=${{ matrix.flavor }},suffix=,enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
+            type=semver,pattern={{version}},value=${{ steps.process_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.process_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
 
       - name: Metadata Output
         shell: bash
         run: |
-          echo -e '########## inputs ##########\n'
+          echo '########## server_version ##########'
+          echo "flavor: ${{ matrix.flavor }}"
+          echo "flavor: ${{ matrix.platform }}"
 
-          echo -e "flavor: ${{ github.event.inputs.flavor }}\n"
+          echo '########## server_version ##########'
+          echo "ete_version: ${{ steps.process_versions.outputs.ete_version }}"
+          echo "semver: ${{ steps.process_versions.outputs.is_semver }}"
 
-          echo -e "version: ${{ github.event.inputs.version }}\n"
+          echo '########## build_metadata ##########'
+          echo "source_name: ${{ steps.build_metadata.outputs.source_name }}"
+          echo "suffix: ${{ steps.build_metadata.outputs.suffix }}"
+          echo "base_version: ${{ steps.build_metadata.outputs.base_version }}"
+          echo "label_version: ${{ steps.build_metadata.outputs.label_version }}"
 
-          echo -e "platforms: ${{ github.event.inputs.platforms }}\n"
-
-          echo -e "tag: ${{ github.event.inputs.tag }}\n"
-
-          echo -e "pushit: ${{ github.event.inputs.pushit }}\n"
-
-          echo -e "${{ toJson(github.event.inputs) }}"
-
-          echo -e '########## server_version ##########\n'
-
-          echo -e "ete_version: ${{ steps.server_version.outputs.ete_version }}\n"
-
-          echo -e "semver: ${{ steps.server_version.outputs.is_semver }}\n"
-
-          echo -e '########## build_metadata ##########\n'
-
-          echo -e "source_name: ${{ steps.build_metadata.outputs.source_name }}\n"
-
-          echo -e "suffix: ${{ steps.build_metadata.outputs.suffix }}\n"
-
-          echo -e "base_version: ${{ steps.build_metadata.outputs.base_version }}\n"
-
-          echo -e "label_version: ${{ steps.build_metadata.outputs.label_version }}\n"
-
-          echo -e '########## docker_metadata ##########\n'
-
-          echo -e "${{ steps.docker_metadata.outputs.tags }}\n"
-
-          echo -e "${{ steps.docker_metadata.outputs.labels }}\n"
+          echo '########## docker_metadata ##########'
+          echo "${{ steps.docker_metadata.outputs.tags }}"
+          echo "${{ steps.docker_metadata.outputs.labels }}"

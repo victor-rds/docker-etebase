@@ -1,21 +1,15 @@
 name: "Get Server Version"
-description: "Load latest working stable server version"
+description: "Load latest version if input is empty or other pre-determined strings "
 
 inputs:
-  force:
+  version:
     description: "Version Override"
     required: false
 
 outputs:
   version:
-    description: "Clear Version (removes 'v' when necessary"
+    description: "Version of the Server"
     value: ${{ steps.get_version_file.outputs.version }}
-  is_semver:
-    description: "If version is a SEMVER or tag/brach"
-    value: ${{ steps.get_version_file.outputs.is_semver }}
-  ete_version:
-    description: "Etebase Version"
-    value: ${{ steps.get_version_file.outputs.ete_version }}
 
 runs:
   using: "composite"
@@ -23,26 +17,13 @@ runs:
     - id: get_version_file
       shell: bash
       env:
-        OVERRIDE: ${{ inputs.force }}
+        OVERRIDE: ${{ inputs.version }}
       run: |
-        if [ -z "${OVERRIDE}" ]; then
+        if [ -z "${OVERRIDE}" ] || [ "${OVERRIDE}" = "latest" ] || [ "${OVERRIDE}" = "stable" ] ; then
           source ./server_version
         else
           ETESYNC_VERSION="${OVERRIDE}"
         fi
 
-        CLEAN_VERSION="${ETESYNC_VERSION#v}"
-
-        if [[ ${CLEAN_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          SEMVER='true'
-        else
-          SEMVER='false'
-        fi
-
-        echo "*Version*: ${CLEAN_VERSION}" >> $GITHUB_STEP_SUMMARY
-        echo "*Is SemVer*? ${SEMVER}" >> $GITHUB_STEP_SUMMARY
-        echo "*Etesync Version*: ${ETESYNC_VERSION}" >> $GITHUB_STEP_SUMMARY
-
-        echo "version=${CLEAN_VERSION}" >> $GITHUB_OUTPUT
-        echo "is_semver=${SEMVER}" >> $GITHUB_OUTPUT
-        echo "ete_version=${ETESYNC_VERSION}" >> $GITHUB_OUTPUT
+        echo "*Version*: ${ETESYNC_VERSION}" >> $GITHUB_STEP_SUMMARY
+        echo "version=${ETESYNC_VERSION}" >> $GITHUB_OUTPUT

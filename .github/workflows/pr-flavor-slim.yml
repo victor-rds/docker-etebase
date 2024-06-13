@@ -10,13 +10,11 @@ on:
       - "tags/slim/Dockerfile"
 
 jobs:
-  pr-dckr-slim-stable:
+  pr-dckr-slim:
+    strategy:
+      matrix:
+        version: [ "stable", "master" ]
     uses: ./.github/workflows/call_pr_build.yml
     with:
       flavor: "slim"
-
-  pr-dckr-slim-master:
-    uses: ./.github/workflows/call_pr_build.yml
-    with:
-      flavor: "slim"
-      version: "master"
+      version: ${{ matrix.version }}

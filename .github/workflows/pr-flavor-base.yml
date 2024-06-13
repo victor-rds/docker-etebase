@@ -10,13 +10,11 @@ on:
       - "tags/base/Dockerfile"
 
 jobs:
-  pr-dckr-base-stable:
+  pr-dckr-base:
+    strategy:
+      matrix:
+        version: [ "stable", "master" ]
     uses: ./.github/workflows/call_pr_build.yml
     with:
       flavor: "base"
-
-  pr-dckr-base-master:
-    uses: ./.github/workflows/call_pr_build.yml
-    with:
-      flavor: "base"
-      version: "master"
+      version: ${{ matrix.version }}

@@ -3,6 +3,7 @@ name: (Pull Request) Check changes to Context
 
 on:
   pull_request:
+    types: [ opened, synchronize, reopened ]
     branches:
       - master
     paths:
@@ -14,12 +15,9 @@ permissions:
 jobs:
   pr-shell-lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Repository checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Differential ShellCheck
         uses: redhat-plumbers-in-action/differential-shellcheck@v5

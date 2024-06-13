@@ -1,0 +1,46 @@
+name: "Preocess Version Data"
+description: "Prepare and extract version information and variants"
+
+inputs:
+  version:
+    description: "the target server version"
+    required: true
+
+outputs:
+  version:
+    description: "Clear Version (removes 'v' when necessary)"
+    value: ${{ steps.get_version_file.outputs.version }}
+  is_semver:
+    description: "If version is a SEMVER or tag/brach"
+    value: ${{ steps.get_version_file.outputs.is_semver }}
+  ete_version:
+    description: "Etebase Version"
+    value: ${{ steps.get_version_file.outputs.ete_version }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: export_version
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        echo $VERSION
+
+        CLEAN_VERSION="${VERSION#v}"
+
+        if [[ ${CLEAN_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          SEMVER='true'
+          ETESYNC_VERSION="v${CLEAN_VERSION}"
+        else
+          SEMVER='false'
+          ETESYNC_VERSION="${CLEAN_VERSION}"
+        fi
+
+        echo "*Version*: ${CLEAN_VERSION}" >> $GITHUB_STEP_SUMMARY
+        echo "*Is SemVer*? ${SEMVER}" >> $GITHUB_STEP_SUMMARY
+        echo "*Etesync Version*: ${ETESYNC_VERSION}" >> $GITHUB_STEP_SUMMARY
+
+        echo "version=${CLEAN_VERSION}" >> $GITHUB_OUTPUT
+        echo "is_semver=${SEMVER}" >> $GITHUB_OUTPUT
+        echo "ete_version=${ETESYNC_VERSION}" >> $GITHUB_OUTPUT
