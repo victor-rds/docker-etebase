@@ -295,7 +295,7 @@ if [ -e "${ETEBASE_EASY_CONFIG_PATH}" ]; then
 	check_perms "$(grep secret_file "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/secret_file = //g')"
 	check_perms "$(grep media_root "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/media_root = //g')" 'w'
 	if grep sqlite3 "${ETEBASE_EASY_CONFIG_PATH}" >/dev/null; then
-		check_perms "$(grep name "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/name = //g')" 'w'
+		check_perms "$(grep '^name = ' "${ETEBASE_EASY_CONFIG_PATH}" | sed -e 's/name = //g')" 'w'
 	fi
 fi
 
