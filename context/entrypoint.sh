@@ -223,7 +223,8 @@ gen_inifile() {
 		EOF
 	fi
 
-	echo '[allowed_hosts]' >> "${ETEBASE_EASY_CONFIG_PATH}"local -a AHOSTS
+	echo '[allowed_hosts]' >> "${ETEBASE_EASY_CONFIG_PATH}"
+	local -a AHOSTS
 	local IFS=,
 	read -ra AHOSTS <<< "${ALLOWED_HOSTS}"
 	for i in "${!AHOSTS[@]}"; do
