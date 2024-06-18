@@ -1,4 +1,4 @@
-name: "Preocess Version Data"
+name: "Process Version Data"
 description: "Prepare and extract version information and variants"
 
 inputs:
@@ -34,10 +34,6 @@ runs:
           SEMVER='false'
           ETESYNC_VERSION="${CLEAN_VERSION}"
         fi
-
-        echo "*Version*: ${CLEAN_VERSION}" >> $GITHUB_STEP_SUMMARY
-        echo "*Is SemVer*? ${SEMVER}" >> $GITHUB_STEP_SUMMARY
-        echo "*Etesync Version*: ${ETESYNC_VERSION}" >> $GITHUB_STEP_SUMMARY
 
         echo "version=${CLEAN_VERSION}" >> $GITHUB_OUTPUT
         echo "is_semver=${SEMVER}" >> $GITHUB_OUTPUT

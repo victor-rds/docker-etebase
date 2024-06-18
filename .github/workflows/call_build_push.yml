@@ -105,11 +105,11 @@ jobs:
           labels: ${{ steps.docker_metadata.outputs.labels }}
           push: ${{ inputs.pushit }}
 
-      - name: Jop Summary
+      - name: Job Summary
         shell: bash
         if: ${{ always() }}
         run: |
-          if ["${{ steps.docker_build_push.conclusion}}" == 'success' ]; then
+          if [ '${{ steps.docker_build_push.conclusion }}' == 'success' ]; then
             echo '### Build successful: :white_check_mark:' > summary.md
           else
             echo '### Build failure: :x:' > summary.md
@@ -121,15 +121,15 @@ jobs:
           Platforms: ${{ inputs.platforms }}
           EOF
 
-          if ["${{ steps.docker_build_push.conclusion}}" == 'success' ]; then
-            cat >> summary.md << EOF
-          #### Docker:
-          ImageID: ${{ steps.docker_build_push.outputs.imageid }}
-          Digest: ${{ steps.docker_build_push.outputs.digest }}
-          ~~~
-          ${{ steps.docker_build_push.outputs.metadata }}
-          ~~~
-          EOF
+          if [ '${{ steps.docker_build_push.conclusion }}' == 'success' ]; then
+            cat >> summary.md <<- EOF
+            #### Docker:
+            ImageID: ${{ steps.docker_build_push.outputs.imageid }}
+            Digest: ${{ steps.docker_build_push.outputs.digest }}
+            ~~~
+            ${{ steps.docker_build_push.outputs.metadata }}
+            ~~~
+            EOF
           fi
 
           cat summary.md >> $GITHUB_STEP_SUMMARY
