@@ -16,6 +16,9 @@ outputs:
   ete_version:
     description: "Etebase Version"
     value: ${{ steps.export_version.outputs.ete_version }}
+  py_version:
+    description: "Python Base Image Version"
+    value: ${{ steps.export_version.outputs.py_version }}
 
 runs:
   using: "composite"
@@ -35,6 +38,9 @@ runs:
           ETESYNC_VERSION="${CLEAN_VERSION}"
         fi
 
+        PY_VERSION=`grep "FROM python:" tags/base/Dockerfile | cut -d ':' -f 2`
+
         echo "version=${CLEAN_VERSION}" >> $GITHUB_OUTPUT
         echo "is_semver=${SEMVER}" >> $GITHUB_OUTPUT
         echo "ete_version=${ETESYNC_VERSION}" >> $GITHUB_OUTPUT
+        echo "py_version=${PY_VERSION}" >> $GITHUB_OUTPUT
