@@ -27,11 +27,12 @@ jobs:
         with:
           version: ${{ inputs.version }}
 
-      - id: process_version
-        name: Process Version data
-        uses: ./.github/actions/process-version
+      - id: prepare
+        name: Process Inputs
+        uses: ./.github/actions/process-inputs
         with:
-          version: ${{ steps.get_version.outputs.version }}
+          ete_version: ${{ steps.get_version.outputs.version }}
+          flavor: ${{ inputs.flavor }}
 
       - id: buildx
         name: Set up Docker Buildx
@@ -44,6 +45,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ./tags/${{ inputs.flavor }}/Dockerfile
-          tags: victorrds/etebase:${{ github.sha }}-${{ inputs.flavor }}
-          build-args: ETE_VERSION=${{ steps.process_version.outputs.ete_version }}
+          tags: victorrds/etebase:${{ steps.prepare.outputs.source_ref }}-${{ inputs.flavor }}
+          build-args: ETE_VERSION=${{ steps.prepare.outputs.ete_version }}
           push: false

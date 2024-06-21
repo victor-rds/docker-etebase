@@ -18,15 +18,15 @@ jobs:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v4
 
-      - id: process_version
-        name: Process Version data
-        uses: ./.github/actions/process-version
+      - id: prepare
+        name: Process Inputs
+        uses: ./.github/actions/process-inputs
         with:
-          version: ${{ inputs.version }}
+          ete_version: ${{ inputs.version }}
 
       - id: create_release
         name: Create Release
-        if: ${{ steps.process_version.outputs.is_semver == 'true' }}
+        if: ${{ steps.prepare.outputs.is_semver == 'true' }}
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
@@ -34,7 +34,7 @@ jobs:
           removeArtifacts: true
           replacesArtifacts: true
           commit: ${{ github.sha }}
-          name: "${{ steps.process_version.outputs.version }}"
+          name: "${{ steps.prepare.outputs.version }}.${{ steps.prepare.outputs.source_ref }}+eb.${{ steps.prepare.outputs.ete_num_version }}+py.${{ steps.prepare.outputs.py_version }}"
           generateReleaseNotes: true
           prerelease: false
-          tag: ${{ steps.process_version.outputs.version }}
+          tag: ${{ steps.prepare.outputs.version }}

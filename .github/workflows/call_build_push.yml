@@ -40,41 +40,38 @@ jobs:
       - name: Checkout Dockerfiles and Context
         uses: actions/checkout@v4
 
-      - id: process_version
-        name: Process Version data
-        uses: ./.github/actions/process-version
+      - id: prepare
+        name: Process Inputs
+        uses: ./.github/actions/process-inputs
         with:
-          version: ${{ inputs.version }}
-
-      - id: build_metadata
-        name: Prepare Project Metadata
-        uses: ./.github/actions/build-metadata
-        with:
+          ete_version: ${{ inputs.version }}
           flavor: ${{ inputs.flavor }}
-          version: ${{ steps.process_version.outputs.version }}
 
       - id: docker_metadata
         name: Prepare Docker Metadata
         uses: docker/metadata-action@v5.5.1
         with:
           labels: |
-            maintainer=victor-rds
-            version=${{ steps.build_metadata.outputs.label_version }}
+            maintainer=${{ github.repository_owner }}
+            version=${{ steps.prepare.outputs.source_ref }}+eb.${{ steps.prepare.outputs.ete_num_version }}+py.${{ steps.prepare.outputs.py_version }}
             org.opencontainers.image.authors=Victor R. Santos <victor-rds@users.noreply.github.com>
             org.opencontainers.image.title=Docker Etebase Server
-            org.opencontainers.image.base.name=${{ steps.build_metadata.outputs.base_version }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prepare.outputs.ete_version }}
+            org.opencontainers.image.base.name=docker.io/library/${{ steps.prepare.outputs.py_image }}
+            org.opencontainers.image.url=https://hub.docker.com/r/${{ secrets.dckr_username }}/etebase
           images: |
-            victorrds/etebase
-            victorrds/etesync
+            ${{ secrets.dckr_username }}/etebase
+            ${{ secrets.dckr_username }}/etesync
           flavor: |
-            latest=${{ ( inputs.flavor == 'base' && steps.process_version.outputs.is_semver == 'true' ) }}
-            suffix=${{ steps.build_metadata.outputs.suffix }}
+            latest=${{ ( inputs.flavor == 'base' && steps.prepare.outputs.is_semver == 'true' ) }}
+            suffix=${{ steps.prepare.outputs.suffix }}
           tags: |
-            type=edge,enable=${{ inputs.tag != '' }},branch=${{ steps.build_metadata.outputs.source_name }}
+            type=edge,enable=${{ inputs.tag != '' || steps.prepare.outputs.is_semver == 'false' }}
             type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
-            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
-            type=semver,pattern={{version}},value=${{ steps.process_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.process_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
+            type=raw,value=${{ inputs.flavor }},suffix=,enable=${{ inputs.tag == '' && steps.prepare.outputs.is_semver == 'true' }}
+            type=semver,pattern={{version}},value=${{ steps.prepare.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.prepare.outputs.is_semver == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.prepare.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.prepare.outputs.is_semver == 'true' }}
 
       - id: qemu
         name: Set up QEMU
@@ -100,7 +97,7 @@ jobs:
           platforms: ${{ inputs.platforms }}
           context: .
           file: ./tags/${{ inputs.flavor }}/Dockerfile
-          build-args: ETE_VERSION=${{ steps.process_version.outputs.ete_version }}
+          build-args: ETE_VERSION=${{ steps.prepare.outputs.ete_version }}
           tags: ${{ steps.docker_metadata.outputs.tags }}
           labels: ${{ steps.docker_metadata.outputs.labels }}
           push: ${{ inputs.pushit }}
@@ -116,20 +113,20 @@ jobs:
           fi
 
           cat >> summary.md << EOF
-          Etesync Version: ${{ steps.process_version.outputs.ete_version }}
+          Etesync Version: ${{ steps.prepare.outputs.ete_version }}
           Image Type: ${{ inputs.flavor }}
           Platforms: ${{ inputs.platforms }}
           EOF
 
           if [ '${{ steps.docker_build_push.conclusion }}' == 'success' ]; then
-            cat >> summary.md <<- EOF
-            #### Docker:
-            ImageID: ${{ steps.docker_build_push.outputs.imageid }}
-            Digest: ${{ steps.docker_build_push.outputs.digest }}
-            ~~~
-            ${{ steps.docker_build_push.outputs.metadata }}
-            ~~~
-            EOF
+            cat >> summary.md << EOF
+          #### Docker:
+          ImageID: ${{ steps.docker_build_push.outputs.imageid }}
+          Digest: ${{ steps.docker_build_push.outputs.digest }}
+          ~~~
+          ${{ steps.docker_build_push.outputs.metadata }}
+          ~~~
+          EOF
           fi
 
           cat summary.md >> $GITHUB_STEP_SUMMARY
