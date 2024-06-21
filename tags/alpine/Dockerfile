@@ -28,8 +28,6 @@ RUN set -eux; \
     apk add --no-cache openssl mailcap libpq libffi libldap libsasl bash; \
     apk add --no-cache --virtual .build-deps coreutils gcc make wget linux-headers \
         cyrus-sasl-dev libc-dev libffi-dev openssl-dev postgresql-dev openldap-dev git; \
-    # Fix Python LDAP build
-    echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so; \
     # Download Etebase and install dependencies
     git clone --depth=1 --branch=${ETE_VERSION} "${ETE_REPO}" "${BASE_DIR}"; \
     /usr/local/bin/python -m pip install --no-cache-dir --progress-bar off --upgrade pip; \
