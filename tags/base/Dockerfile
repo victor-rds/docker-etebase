@@ -22,12 +22,13 @@ ENV PORT 3735
 WORKDIR ${BASE_DIR}
 
 # OS packages and deps installation
-# hadolint ignore=DL3008,DL3018,SC2086
+# hadolint ignore=DL3008,SC2086
 RUN set -eux; \
     # Prepare packages required by the base image
-    export BUILD_DEPS='libldap2-dev libsasl2-dev'; \
     apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mime-support \
+    apt-get upgrade -y; \
+    export BUILD_DEPS='libldap2-dev libsasl2-dev'; \
+    apt-get install -y --no-install-recommends mime-support \
         libffi8 libpq5 libssl3 libldap-common libsasl2-2 ${BUILD_DEPS}; \
     # Download Etebase and install dependencies
     git clone --depth=1 --branch=${ETE_VERSION} "${ETE_REPO}" "${BASE_DIR}"; \
@@ -36,6 +37,7 @@ RUN set -eux; \
     # Remove packages no longer required by the base image
     apt-get remove --purge -y ${BUILD_DEPS}; \
     apt-get autoremove --purge -y; \
+    apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
     # Clear Downloads and set permissions
     rm -r "${BASE_DIR}/.git"; \

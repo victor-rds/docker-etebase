@@ -21,9 +21,10 @@ ENV PORT 3735
 WORKDIR ${BASE_DIR}
 
 # OS packages and deps installation
-# hadolint ignore=DL3008,DL3018
+# hadolint ignore=DL3018
 RUN set -eux; \
     # Prepare packages required by the base image
+    apk upgrade --no-cache; \
     apk add --no-cache openssl mailcap libpq libffi libldap libsasl bash; \
     apk add --no-cache --virtual .build-deps coreutils gcc make wget linux-headers \
         cyrus-sasl-dev libc-dev libffi-dev openssl-dev postgresql-dev openldap-dev git; \
