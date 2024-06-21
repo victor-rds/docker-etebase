@@ -2,7 +2,7 @@
 name: (Test) Metadata Actions for Dispatch Build
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       flavors:
         description: "Base images"
@@ -37,7 +37,7 @@ on:
         type: boolean
 
 jobs:
-  test-prepare-metadata:
+  test-get-version:
     runs-on: ubuntu-latest
     outputs:
       ete_version: ${{ steps.get_version.outputs.version }}
@@ -69,69 +69,62 @@ jobs:
           echo "ete-version: ${{ steps.get_version.outputs.version }}"
 
   test-generate-metadata:
-    needs: test-prepare-metadata
+    needs: test-get-version
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ${{ fromJson(github.event.inputs.platforms) }}
         flavor: ${{ fromJson(github.event.inputs.flavors) }}
     steps:
       - id: checkout
         name: Checkout Dockerfiles and Context
         uses: actions/checkout@v4
 
-      - id: process_version
-        name: Process Version data
-        uses: ./.github/actions/process-version
+      - id: prepare
+        name: Process Inputs
+        uses: ./.github/actions/process-inputs
         with:
-          version: ${{ needs.test-prepare-metadata.outputs.ete_version }}
-
-      - id: build_metadata
-        name: Prepare Project Metadata
-        uses: ./.github/actions/build-metadata
-        with:
+          ete_version: ${{ needs.test-get-version.outputs.ete_version }}
           flavor: ${{ matrix.flavor }}
-          version: ${{ steps.process_version.outputs.version }}
 
       - id: docker_metadata
         name: Prepare Docker Metadata
         uses: docker/metadata-action@v5.5.1
         with:
           labels: |
-            maintainer=victor-rds
-            version=${{ steps.build_metadata.outputs.label_version }}
+            maintainer=${{ github.repository_owner }}
+            version=${{ steps.prepare.outputs.source_ref }}+eb.${{ steps.prepare.outputs.ete_num_version }}+py.${{ steps.prepare.outputs.py_version }}
             org.opencontainers.image.authors=Victor R. Santos <victor-rds@users.noreply.github.com>
             org.opencontainers.image.title=Docker Etebase Server
-            org.opencontainers.image.base.name=${{ steps.build_metadata.outputs.base_version }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prepare.outputs.ete_version }}
+            org.opencontainers.image.base.name=docker.io/library/${{ steps.prepare.outputs.py_image }}
+            org.opencontainers.image.url=https://hub.docker.com/r/${{ secrets.dckr_username }}/etebase
           images: |
-            victorrds/etebase
-            victorrds/etesync
+            ${{ secrets.dckr_username }}/etebase
+            ${{ secrets.dckr_username }}/etesync
           flavor: |
-            latest=${{ ( matrix.flavor == 'base' && steps.process_version.outputs.is_semver == 'true' ) }}
-            suffix=${{ steps.build_metadata.outputs.suffix }}
+            latest=${{ ( matrix.flavor == 'base' && steps.prepare.outputs.is_semver == 'true' ) }}
+            suffix=${{ steps.prepare.outputs.suffix }}
           tags: |
-            type=edge,enable=${{ inputs.tag != '' }},branch=${{ steps.build_metadata.outputs.source_name }}
+            type=edge,enable=${{ inputs.tag != '' || steps.prepare.outputs.is_semver == 'false' }}
             type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
-            type=raw,value=${{ matrix.flavor }},suffix=,enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
-            type=semver,pattern={{version}},value=${{ steps.process_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.process_version.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.process_version.outputs.is_semver == 'true' }}
+            type=raw,value=${{ matrix.flavor }},suffix=,enable=${{ inputs.tag == '' && steps.prepare.outputs.is_semver == 'true' }}
+            type=semver,pattern={{version}},value=${{ steps.prepare.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.prepare.outputs.is_semver == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.prepare.outputs.ete_version }},enable=${{ inputs.tag == '' && steps.prepare.outputs.is_semver == 'true' }}
 
       - name: Metadata Output
         shell: bash
         run: |
-          echo '########## server_version ##########'
           echo "flavor: ${{ matrix.flavor }}"
-          echo "flavor: ${{ matrix.platform }}"
 
-          echo '########## server_version ##########'
-          echo "ete_version: ${{ steps.process_versions.outputs.ete_version }}"
-          echo "semver: ${{ steps.process_versions.outputs.is_semver }}"
-
-          echo '########## build_metadata ##########'
-          echo "source_name: ${{ steps.build_metadata.outputs.source_name }}"
-          echo "suffix: ${{ steps.build_metadata.outputs.suffix }}"
-          echo "base_version: ${{ steps.build_metadata.outputs.base_version }}"
-          echo "label_version: ${{ steps.build_metadata.outputs.label_version }}"
+          echo '########## prepare ##########'
+          echo "suffix: ${{ steps.prepare.outputs.suffix }}"
+          echo "semver: ${{ steps.prepare.outputs.is_semver }}"
+          echo "ete_version: ${{ steps.prepare.outputs.ete_version }}"
+          echo "ete_version (num only): ${{ steps.prepare.outputs.ete_num_version }}"
+          echo "py_image: ${{ steps.prepare.outputs.py_image }}"
+          echo "py_version: ${{ steps.prepare.outputs.py_version }}"
+          echo "source_ref: ${{ steps.prepare.outputs.source_ref }}"
 
           echo '########## docker_metadata ##########'
           echo "${{ steps.docker_metadata.outputs.tags }}"

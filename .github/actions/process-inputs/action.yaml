@@ -1,0 +1,93 @@
+name: "Process Inputs"
+description: "Process inputs, extract and validates data used by futher steps"
+
+inputs:
+  ete_version:
+    description: "the target server version"
+    required: true
+  flavor:
+    description: "Base image"
+    required: true
+    default: "base"
+
+outputs:
+  suffix:
+    description: "Suffix for Docker Tags"
+    value: ${{ steps.process.outputs.suffix }}
+  ete_num_version:
+    description: "Clear Version (removes 'v' when necessary)"
+    value: ${{ steps.process.outputs.version }}
+  is_semver:
+    description: "If version is a SEMVER or tag/brach"
+    value: ${{ steps.process.outputs.is_semver }}
+  ete_version:
+    description: "Etebase Version"
+    value: ${{ steps.process.outputs.ete_version }}
+  py_version:
+    description: "Python Base Image Version"
+    value: ${{ steps.process.outputs.py_version }}
+  py_image:
+    description: "Python Base Image"
+    value: ${{ steps.process.outputs.py_version }}
+  source_ref:
+    description: "Source Ref"
+    value: ${{ steps.process.outputs.source_ref }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: process
+      shell: bash
+      env:
+        ETESYNC_VERSION: ${{ inputs.ete_version }}
+        FLAVOR: ${{ inputs.flavor }}
+      run: |
+        set -e
+
+        ## Validate Flavor and prepare Suffix
+        if [ ! -e "tags/${FLAVOR}/Dockerfile" ]; then
+            echo "Invalid flavor: ${FLAVOR}" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+        fi
+
+        SUFFIX=""
+        if [ -n "${FLAVOR}" ] && [ "${FLAVOR}" != "base" ]; then
+            SUFFIX="-${FLAVOR}"
+        fi
+
+        ## Validate Etebase version
+        CLEAN_VERSION="${ETESYNC_VERSION#v}"
+
+        if [[ "${CLEAN_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            SEMVER='true'
+        else
+            SEMVER='false'
+        fi
+
+        ## Extract & validate Python version
+        PY_IMAGE=$(grep "FROM python:" "tags/${FLAVOR}/Dockerfile" | cut -d ':' -f 2)
+        PY_VERSION=$(cut -d '-' -f 1 <<<"$PY_IMAGE")
+
+        if [ "${PY_VERSION}${SUFFIX}" != "${PY_IMAGE}" ]; then
+            echo "Invalid base image: python:${PY_IMAGE}" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+        fi
+
+        ## Determine source ref
+        REF_TYPE=$(cut -d '/' -f 2 <<< "$GITHUB_REF")
+
+        if [ "${REF_TYPE}" != 'pull' ]; then
+            SOURCE_REF="${GITHUB_SHA:0:7}"
+        else 
+            SOURCE_REF="pr-$(cut -d '/' -f 3 <<< "$GITHUB_REF")"
+        fi
+
+        {
+            echo "suffix=${SUFFIX}"
+            echo "is_semver=${SEMVER}"
+            echo "ete_version=${ETESYNC_VERSION}"
+            echo "ete_num_version=${CLEAN_VERSION}"
+            echo "py_image=python:${PY_IMAGE}"
+            echo "py_version=${PY_VERSION}"
+            echo "source_ref=${SOURCE_REF}"
+        } >>"$GITHUB_OUTPUT"
